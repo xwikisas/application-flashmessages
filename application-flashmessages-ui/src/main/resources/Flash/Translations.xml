@@ -40,7 +40,7 @@
   <validationScript/>
   <comment/>
   <minorEdit>false</minorEdit>
-  <syntaxId>xwiki/2.1</syntaxId>
+  <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
   <object>
     <class>
@@ -83,6 +83,7 @@ flash.creation.utcinfo=The time used for alerts is based on UTC. To check the UT
 flash.home.title=Flash entries
 flash.home.msginfo=See here the history of FLASH messages published on the knowledge base.
 flash.panels.quicklinktitle=Flash Messages
+flash.error.noValidLicense=There is no valid license for the Flash Messages Application (Pro).
 
 ## Livetable ##
 flash.livetable.doc.name=Name

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- *
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
@@ -19,26 +18,21 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- *
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.xwiki.commons</groupId>
-    <artifactId>xwiki-commons-pom</artifactId>
-    <version>6.4.1</version>
+    <groupId>com.xwiki.parent</groupId>
+    <artifactId>xwikisas-parent-platform</artifactId>
+    <version>8.5</version>
   </parent>
-  <groupId>org.xwiki.contrib</groupId>
+  <groupId>com.xwiki.flashmessages</groupId>
   <artifactId>application-flashmessages</artifactId>
   <version>1.1.5-SNAPSHOT</version>
-  <name>Flash Messages Application</name>
+  <name>Flash Messages Application (Pro) Parent POM</name>
   <packaging>pom</packaging>
   <description>Allows you to create Flash messages aiming at one or multiple local groups</description>
-  <properties>
-    <platform.version>${commons.version}</platform.version>
-    <rendering.version>${commons.version}</rendering.version>
-  </properties>
   <modules>
     <module>application-flashmessages-ui</module>
   </modules>
@@ -51,30 +45,9 @@
     </profile>
   </profiles>
   <scm>
-    <connection>scm:git:git://github.com/xwiki-contrib/application-flashmessages.git</connection>
-    <developerConnection>scm:git:git@github.com:xwiki-contrib/application-flashmessages.git</developerConnection>
-    <url>https://github.com/xwiki-contrib/application-flashmessages/tree/master</url>
+    <connection>scm:git:git://github.com/xwikisas/application-flashmessages.git</connection>
+    <developerConnection>scm:git:git@github.com:xwikisas/application-flashmessages.git</developerConnection>
+    <url>https://github.com/xwikisas/application-flashmessages/tree/master</url>
     <tag>HEAD</tag>
   </scm>
-  <developers>
-    <developer>
-      <id>vrachieru</id>
-      <name>Victor Rachieru</name>
-    </developer>
-    <developer>
-      <id>gdelhumeau</id>
-      <name>Guillaume Delhumeau</name>
-    </developer>
-    <developer>
-      <id>DjeblounSidali</id>
-      <name>Sidali Djebloun</name>
-    </developer>
-  </developers>
-  <distributionManagement>
-    <repository>
-      <id>xwiki-staging</id>
-      <name>XWiki Staging Repository</name>
-      <url>http://nexus.xwiki.org/nexus/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
 </project>

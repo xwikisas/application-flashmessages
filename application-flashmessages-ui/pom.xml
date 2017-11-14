@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- *
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
@@ -19,31 +18,36 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- *
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.xwiki.contrib</groupId>
+    <groupId>com.xwiki.flashmessages</groupId>
     <artifactId>application-flashmessages</artifactId>
     <version>1.1.5-SNAPSHOT</version>
   </parent>
   <artifactId>application-flashmessages-ui</artifactId>
   <packaging>xar</packaging>
-  <name>Flash Messages Application - UI</name>
+  <name>Flash Messages Application (Pro) UI</name>
   <properties>
     <!-- Name to display by the Extension Manager -->
-    <xwiki.extension.name>Flash Messages Application</xwiki.extension.name>
+    <xwiki.extension.name>Flash Messages Application (Pro)</xwiki.extension.name>
+    <licensing.version>1.6</licensing.version>
+    <!-- The list of documents that have an implicit unlimited free license. The users can view these documents without
+      buying a license or getting a trial license, but they cannot edit or delete them. -->
+    <xwiki.extension.licensing.publicDocuments>
+      Flash.WebHome
+    </xwiki.extension.licensing.publicDocuments>
     <!-- Don't run CLIRR here since there's no Java code. -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
-    <!-- Old names of this module used for retro compatibility when resolving dependencies of old extensions -->
-    <xwiki.extension.features>
-      sidali:flash-messages-application,
-      org.xwiki.contrib:application-flashmessages
-    </xwiki.extension.features>
   </properties>
   <dependencies>
+    <dependency>
+      <groupId>com.xwiki.licensing</groupId>
+      <artifactId>application-licensing-licensor-api</artifactId>
+      <version>${licensing.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-appwithinminutes-ui</artifactId>
@@ -82,22 +86,4 @@
       <scope>runtime</scope>
     </dependency>
   </dependencies>
-  <build>
-    <!-- Needed to add support for the XAR packaging -->
-    <extensions>
-      <extension>
-        <groupId>org.xwiki.commons</groupId>
-        <artifactId>xwiki-commons-tool-xar-handlers</artifactId>
-        <version>${commons.version}</version>
-      </extension>
-    </extensions>
-    <plugins>
-      <!-- The XAR packaging uses the XAR plugin and thus we need to define what version to use -->
-      <plugin>
-        <groupId>org.xwiki.commons</groupId>
-        <artifactId>xwiki-commons-tool-xar-plugin</artifactId>
-        <version>${commons.version}</version>
-      </plugin>
-    </plugins>
-  </build>
 </project>
