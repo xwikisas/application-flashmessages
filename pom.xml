@@ -33,6 +33,9 @@
   <name>Flash Messages Application (Pro) Parent POM</name>
   <packaging>pom</packaging>
   <description>Allows you to create Flash messages aiming at one or multiple local groups</description>
+   <properties>
+    <licensing.version>1.6</licensing.version>
+  </properties>
   <modules>
     <module>application-flashmessages-ui</module>
   </modules>
