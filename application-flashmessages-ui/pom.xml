@@ -29,7 +29,7 @@
   </parent>
   <artifactId>application-flashmessages-ui</artifactId>
   <packaging>xar</packaging>
-  <name>Flash Messages Application (Pro) UI</name>
+  <name>Flash Messages Application (Pro) - UI</name>
   <properties>
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>Flash Messages Application (Pro)</xwiki.extension.name>
