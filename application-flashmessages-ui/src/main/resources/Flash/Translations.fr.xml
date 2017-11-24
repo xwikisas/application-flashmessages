@@ -39,8 +39,7 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>## XWiki Translation for language fr generated from http://www.l10n.xwiki.org
-Flash.FlashClass_dateBegin=Date de début
+  <content>Flash.FlashClass_dateBegin=Date de début
 Flash.FlashClass_dateEnd=Date de fin
 Flash.FlashClass_groups=Groupes
 Flash.FlashClass_message=Message
@@ -81,5 +80,8 @@ flash.repeat.summary.monthly=mois
 flash.repeat.summary.on=sur
 flash.repeat.summary.weekly=semaines
 flash.repeat.summary.yearly=ans
-</content>
+
+## Template Provider ##
+templateProvider.flashmessages.name=Messages Flash
+templateProvider.flashmessages.description=Messages flash programmés visant un ou plusieurs groupes</content>
 </xwikidoc>
