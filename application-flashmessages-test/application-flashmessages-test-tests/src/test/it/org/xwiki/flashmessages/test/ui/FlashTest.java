@@ -280,7 +280,6 @@ public class FlashTest extends AbstractTest
 
             // Entry: edit
             entryEditPage = FlashEntryEditPage.gotoPage(entryPage, language);
-            getDriver().waitUntilPageIsReloaded();
             Assert.assertEquals(entryEditPage.getDateBeginLabel(),
                 translation.getKeyUppercase("Flash.FlashClass_dateBegin"));
             Assert.assertEquals(entryEditPage.getDateEndLabel(),
