@@ -36,7 +36,7 @@ import org.xwiki.test.ui.po.editor.DatePicker;
  * Represents a Flash Messages entry page being edited.
  *
  * @version $Id$
- * @since
+ * @since 1.1.2
  */
 public class FlashEntryEditPage extends FlashPage
 {
@@ -88,7 +88,7 @@ public class FlashEntryEditPage extends FlashPage
     /**
      * Go to page
      * 
-     * @param the page name of the flash entry page
+     * @param page the page name of the flash entry page
      * @return the edit page of the requested entry
      */
     public static FlashEntryEditPage gotoPage(String page)
@@ -113,7 +113,7 @@ public class FlashEntryEditPage extends FlashPage
      * Set value for date element
      * 
      * @param element the element representing a date input
-     * @param date the date value to set
+     * @param calendar the date value to set
      */
     private void setDate(WebElement element, Calendar calendar)
     {
@@ -289,7 +289,7 @@ public class FlashEntryEditPage extends FlashPage
     /**
      * Set the groups the groups towards the message is aimed to
      * 
-     * @param list of XWiki groups for which the entry is displayed
+     * @param groups the list of XWiki groups for which the entry is displayed
      */
     public void setGroups(List<String> groups)
     {
