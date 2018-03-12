@@ -47,6 +47,10 @@
       </modules>
     </profile>
   </profiles>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/xwikisas/application-flashmessages/issues</url>
+  </issueManagement>
   <scm>
     <connection>scm:git:git://github.com/xwikisas/application-flashmessages.git</connection>
     <developerConnection>scm:git:git@github.com:xwikisas/application-flashmessages.git</developerConnection>
