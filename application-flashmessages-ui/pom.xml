@@ -33,6 +33,7 @@
   <properties>
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>Flash Messages Application (Pro)</xwiki.extension.name>
+    <xwiki.extension.category>application</xwiki.extension.category>
     <xwiki.extension.licensing.excludedDocuments>
       Flash.WebHome
     </xwiki.extension.licensing.excludedDocuments>
