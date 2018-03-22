@@ -71,6 +71,7 @@ flash.livetable.doc.date=Date de mise à jour
 flash.livetable.doc.name=Nom
 flash.livetable.groups=Groupes
 flash.livetable.message=Message
+flash.livetable.emptyvalue=-
 flash.panels.quicklinktitle=Messages Flash
 flash.repeat.summary=Résumé de répétition
 flash.repeat.summary.daily=journées
