@@ -34,8 +34,11 @@
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>Flash Messages Application (Pro)</xwiki.extension.name>
     <xwiki.extension.category>application</xwiki.extension.category>
-    <xwiki.extension.licensing.excludedDocuments>
+    <xwiki.extension.licensing.publicDocuments>
       Flash.WebHome
+    </xwiki.extension.licensing.publicDocuments>
+    <xwiki.extension.licensing.excludedDocuments>
+      Flash.WebHomeSheet
     </xwiki.extension.licensing.excludedDocuments>
     <!-- Don't run CLIRR here since there's no Java code. -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
