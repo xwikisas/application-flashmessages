@@ -38,7 +38,8 @@
       Flash.WebHome
     </xwiki.extension.licensing.publicDocuments>
     <xwiki.extension.licensing.excludedDocuments>
-      Flash.WebHomeSheet
+      Flash.WebHomeSheet,
+      Flash.WebPreferences
     </xwiki.extension.licensing.excludedDocuments>
     <!-- Don't run CLIRR here since there's no Java code. -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
