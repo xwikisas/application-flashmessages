@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.0" reference="Flash.FlashNotifier" locale="">
+<xwikidoc version="1.3" reference="Flash.FlashNotifier" locale="">
   <web>Flash</web>
   <name>FlashNotifier</name>
   <language/>
@@ -153,51 +153,72 @@
       <cache>long</cache>
     </property>
     <property>
-      <code>/**
- * Confirm that the user has seen the popups
- */
-window.flashNotifierConfirm = function(params){
-  window.flashPopup.closeDialog();
-  new Ajax.Request("$doc.getURL('get')", {
-    parameters : {'ajax' : '1', 'flash': params['document']},
-    method: 'get'
+      <code>require(['jquery'], function($) {
+  /**
+   * Initialize the flash notifier.
+   */
+  window.flashNotifier = function(params) {
+    window.flashNotifierParams = params;
+    window.flashNotifierIndex = 0;
+    window.flashNotifierNext();
+  };
+  /**
+  * Display the next popup.
+  */
+  window.flashNotifierNext = function() {
+    // If index &gt; length, stop it!
+    if(window.flashNotifierIndex &gt;= window.flashNotifierParams.length) {
+      return;
+    }
+    // Get the params.
+    var params = window.flashNotifierParams[window.flashNotifierIndex];
+    // Show the popup.
+    $(window).on('load', function() {
+      window.flashPopup.modal('show');
+    });
+    // When window has already been loaded.
+    if(window.flashNotifierIndex &gt; 0) {
+      window.flashPopup.modal('show');
+    }
+  }
+  /**
+   * Confirm that the user has seen the popups.
+   */
+  window.flashNotifierConfirm = function() {
+    let params = window.flashNotifierParams[window.flashNotifierIndex];
+    url = new XWiki.Document('FlashNotifier', 'Flash').getURL('get');
+    $.ajax({
+      url : url,
+      data : {'ajax' : '1', 'flash' : params['document']},
+    });
+    window.flashNotifierIndex++;
+    window.flashNotifierNext();
+  }
+   /**
+   * Events when flashPopup is shown.
+   */
+  $(document).on('show.bs.modal', '#flashPopup', function(event) {
+    let params = window.flashNotifierParams[window.flashNotifierIndex];
+    $(this).find('.modal-title').text(params['date']);
+    $(this).find('.modal-body').text(params['message']);
   });
-  window.flashNotifierNext();
-}
-
-/** 
- * Display the next popup
- */
-window.flashNotifierNext = function(){
-  // If index &gt; length, stop it!
-  if(window.flashNotifierIndex &gt;= window.flashNotifierParams.length)
-    return;
-  // Get the params
-  var params = window.flashNotifierParams[window.flashNotifierIndex++];
-  // Create the popup
-  window.flashPopup = new XWiki.widgets.MyModalPopup({});  
-  // Create the content
-  var content = window.flashPopup.content;// $('my-modal-popup'); 
-  content.insert(params['date']);
-  content.insert(params['message']);  
-  var f = new Element('form');
-  var p = new Element('p', {'style': 'text-align: center'});
-  var input = new Element('input', {'type':'submit', 'class': 'button', 'value': 'OK'});
-  input.observe('click', function f(event){event.stop(); window.flashNotifierConfirm(params);});
-  f.insert(p);
-  p.insert(input);
-  content.insert(f);
-}
-
-/** 
- * Initialize the flash notifier
- */
-window.flashNotifier = function(params){
-  window.flashNotifierParams = params;
-  window.flashNotifierIndex = 0;
-  window.flashNotifierNext();
-};
-</code>
+  /**
+   * Save the fact that 'ok' button was clicked.
+   */
+  $(document).on('click', '#flashPopup input.btn-primary', function(event) {
+    $(this).data('clicked', true);
+  });
+  /**
+   * Check if we can show the next popup when the modal is closed.
+   */
+  $(document).on('hidden.bs.modal', '#flashPopup', function(event) {
+    var okButton = $('#flashPopup input.btn-primary');
+    if(okButton.data('clicked')) {
+      window.flashNotifierConfirm();
+      okButton.data('clicked', false);
+    }
+  });
+});</code>
     </property>
     <property>
       <name>Flash Notifier</name>
