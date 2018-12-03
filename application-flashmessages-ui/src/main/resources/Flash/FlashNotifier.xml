@@ -43,10 +43,10 @@
 ## Mark the message as seen by the current user
 #if("$!request.ajax" == '1' &amp;&amp; $xcontext.action == 'get')
   #set($dateNow = $datetool.getSystemDate())
-  #set($dateFormat = $xwiki.getXWikiPreference('dateformat', 'dd/MM/yyyy'))
   #set($msgdoc = $xwiki.getDocument($request.flash))
   #set($userdoc = $xwiki.getDocument($xcontext.user))
   #if($userdoc &amp;&amp; !$userdoc.isNew() &amp;&amp; $xwiki.exists($msgdoc))
+    #set($dateFormat = $xwiki.getXWikiPreference('dateformat', 'dd/MM/yyyy'))
     ## Start by looking in the user document in order to ensure backwards compatibility
     #set($obj = $userdoc.getObject('Flash.FlashValidationClass'))
     #set($list = $obj.getProperty('flash').getValue())
