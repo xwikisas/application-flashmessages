@@ -86,6 +86,7 @@
 ##            DISPLAY MESSAGES
 ###############################################
 #set($dateNow = $datetool.getSystemDate())
+#set($dateFormat = $xwiki.getXWikiPreference('dateformat', 'dd/MM/yyyy'))
 ##
 ## If the user is not in any group then no message should be displayed
 #if("$!groupsFilter" != '')
@@ -155,11 +156,11 @@
   #set($msgValObj = $msgDoc.getObject('Flash.FlashValidationClass'))
   #set($msgValList = $msgValObj.getProperty('flash').getValue())
   #set($msgDateSeen = $msgValObj.getValue('seenDate'))
-  #set($dateToday = $datetool.format('dd/MM/yyyy', $dateNow))
-  #set($seenDate = $datetool.format('dd/MM/yyyy', $msgDateSeen))
+  #set($dateToday = $datetool.format($dateFormat, $dateNow))
+  #set($seenDate = $datetool.format($dateFormat, $msgDateSeen))
   #set($seenToday = $dateToday == $seenDate)
   ##
-  #if(!$userValList.contains($msg.doc) &amp;&amp; !$msgValList.contains($xcontext.user) || $seenToday == false)
+  #if(!$userValList.contains($msg.doc) &amp;&amp; !$msgValList.contains($xcontext.user) || !$seenToday)
     #set($discard = $need.add($msg.doc))
   #end
 #end
