@@ -86,10 +86,10 @@
 ##            DISPLAY MESSAGES
 ###############################################
 #set($dateNow = $datetool.getSystemDate())
-#set($dateFormat = $xwiki.getXWikiPreference('dateformat', 'dd/MM/yyyy'))
 ##
 ## If the user is not in any group then no message should be displayed
 #if("$!groupsFilter" != '')
+  #set($dateFormat = $xwiki.getXWikiPreference('dateformat', 'dd/MM/yyyy'))
   #set($baseQuery = "select doc.fullName, obj.dateBegin {0} from Document doc, doc.object(Flash.FlashClass) as obj WHERE doc.fullName &lt;&gt; 'Flash.FlashTemplate' $!groupsFilter AND obj.dateBegin &lt;= :now AND (obj.dateEnd is null OR obj.dateEnd &gt; :now) {1} ORDER BY obj.dateBegin DESC")
   ##
   #set($nonRecurringQuery = $baseQuery.replace("{0}", "").replace("{1}", "AND (obj.repeat is null OR obj.repeat = 0)"))
