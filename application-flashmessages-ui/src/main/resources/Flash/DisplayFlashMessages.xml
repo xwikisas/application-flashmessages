@@ -154,15 +154,12 @@
   #set($msgDoc = $xwiki.getDocument($msg.doc))
   #set($msgValObj = $msgDoc.getObject('Flash.FlashValidationClass'))
   #set($msgValList = $msgValObj.getProperty('flash').getValue())
-  #set($msgDateSeen = $msgValObj.getProperty('seenDate').getValue())
-  #set($dateToday = $datetool.format('yyyy-M-d',$dateNow))
-  #set($seenDate = $datetool.format('yyyy-M-d',$msgDateSeen))
-  #set($seenToday = true)
-  #if($dateToday != $seenDate)
-    #set($seenToday = false)
-  #end
+  #set($msgDateSeen = $msgValObj.getValue('seenDate'))
+  #set($dateToday = $datetool.format('dd/MM/yyyy', $dateNow))
+  #set($seenDate = $datetool.format('dd/MM/yyyy', $msgDateSeen))
+  #set($seenToday = $dateToday == $seenDate)
   ##
-  #if(!$userValList.contains($msg.doc) &amp;&amp; !$msgValList.contains($xcontext.user) || ($seenToday == false))
+  #if(!$userValList.contains($msg.doc) &amp;&amp; !$msgValList.contains($xcontext.user) || $seenToday == false)
     #set($discard = $need.add($msg.doc))
   #end
 #end
