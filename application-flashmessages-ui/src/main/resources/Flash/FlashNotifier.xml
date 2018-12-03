@@ -42,6 +42,7 @@
   <content>{{velocity}}
 ## Mark the message as seen by the current user
 #if("$!request.ajax" == '1' &amp;&amp; $xcontext.action == 'get')
+  #set($dateNow = $datetool.getSystemDate())
   #set($msgdoc = $xwiki.getDocument($request.flash))
   #set($userdoc = $xwiki.getDocument($xcontext.user))
   #if($userdoc &amp;&amp; !$userdoc.isNew() &amp;&amp; $xwiki.exists($msgdoc))
@@ -59,12 +60,23 @@
       #set($list = $obj.getProperty('flash').getValue())
       #if($list == $util.getNull())
         #set($discard = $obj.set('flash', [$xcontext.user]))
+        #set($discard = $obj.set('seenDate', $dateNow))
         #set($discard = $msgdoc.saveAsAuthor("$xcontext.user has seen the message"))
       #elseif($list.class.name == 'com.xpn.xwiki.objects.ListProperty$NotifyList' &amp;&amp; !$list.contains($xcontext.user))
         #set($discard = $list.add($xcontext.user))
         #set($discard = $obj.set('flash', $list))
+        #set($discard = $obj.set('seenDate', $dateNow))
         #set($discard = $msgdoc.saveAsAuthor("$xcontext.user has seen the message"))
       #end
+    #end
+    ## Check if the message should be mark as seen today
+    #set($msgObj = $msgdoc.getObject('Flash.FlashValidationClass'))
+    #set($msgDateSeen = $msgObj.getProperty('seenDate').getValue())
+    #set($dateToday = $datetool.format('yyyy-M-d',$dateNow))
+    #set($seenDate = $datetool.format('yyyy-M-d',$msgDateSeen))
+    #if($dateToday != $seenDate)
+      #set($discard = $msgObj.set('seenDate', $dateNow))
+      #set($discard = $msgdoc.saveAsAuthor("$xcontext.user has seen the message"))
     #end
   #end
 #end
