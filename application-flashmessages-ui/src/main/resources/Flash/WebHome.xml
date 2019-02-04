@@ -50,6 +50,34 @@
   <object>
     <name>Flash.WebHome</name>
     <number>0</number>
+    <className>XWiki.DefaultPageTemplateClass</className>
+    <guid>02782f2a-cb25-4a88-b2d6-443d4a894da2</guid>
+    <class>
+      <name>XWiki.DefaultPageTemplateClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultPageTemplate>
+        <disabled>0</disabled>
+        <name>defaultPageTemplate</name>
+        <number>1</number>
+        <prettyName>defaultPageTemplate</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultPageTemplate>
+    </class>
+    <property>
+      <defaultPageTemplate>Flash.Code.FlashMessagesTemplateProvider</defaultPageTemplate>
+    </property>
+  </object>
+  <object>
+    <name>Flash.WebHome</name>
+    <number>0</number>
     <className>XWiki.DocumentSheetBinding</className>
     <guid>4939aff5-9ec6-437a-bb98-3081abe7d02c</guid>
     <class>
