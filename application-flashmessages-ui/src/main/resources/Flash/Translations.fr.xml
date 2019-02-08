@@ -62,6 +62,7 @@ admin.flashmessages=Messages Flash
 flash.creation.utcinfo=Le temps utilisé pour les alertes est basé sur UTC. Pour vérifier l'heure UTC, vous pouvez utiliser le bouton 'now' dans le calendrier
 flash.home.msginfo=Voir ici l’historique de messages Flash publiés sur la base de connaissances.
 flash.home.title=Entrées flash
+flash.extension.name=Flash Messages Application (Pro)
 flash.livetable._actions=Actions
 flash.livetable._actions.delete=Supprimer
 flash.livetable._actions.edit=Éditer
