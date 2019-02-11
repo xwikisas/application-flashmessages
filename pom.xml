@@ -34,7 +34,7 @@
   <packaging>pom</packaging>
   <description>Allows you to create Flash messages aiming at one or multiple local groups</description>
    <properties>
-    <licensing.version>1.13</licensing.version>
+    <licensing.version>1.13.2</licensing.version>
   </properties>
   <modules>
     <module>application-flashmessages-ui</module>
