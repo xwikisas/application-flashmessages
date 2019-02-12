@@ -65,9 +65,9 @@
 
   #set ($discard = $xwiki.ssfx.use('uicomponents/widgets/userpicker/userPicker.css', true))
   ##
-  #set($columns = ['doc.name', 'dateBegin', 'dateEnd', 'message', 'doc.date','groups', '_actions'])
+  #set($columns = ['doc.title', 'dateBegin', 'dateEnd', 'message', 'doc.date','groups', '_actions'])
   #set($columnsProperties = {
-    'doc.name': {'type': 'text', 'link': 'view', 'size': 10},
+    'doc.title': {'type': 'text', 'link': 'view', 'size': 10},
     'dateBegin': {'type': 'text', 'size': 10},
     'dateEnd': {'type': 'text', 'size': 10},
     'message': {'type': 'text', 'size': 10, 'sortable': false, 'html': true},
@@ -79,7 +79,7 @@
     'className': 'Flash.FlashClass',
     'translationPrefix': 'flash.livetable.',
     'tagCloud': true,
-    'selectedColumn': 'doc.name'
+    'selectedColumn': 'doc.title'
   })
   ##
   #livetable('flash' $columns $columnsProperties $options)
