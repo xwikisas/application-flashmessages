@@ -32,38 +32,136 @@
   <packaging>jar</packaging>
   <properties>
     <xwikiCfgSuperadminPassword>pass</xwikiCfgSuperadminPassword>
-    <xwikiCfgPlugins>\
-      com.xpn.xwiki.plugin.skinx.JsSkinExtensionPlugin,\
-      com.xpn.xwiki.plugin.skinx.JsSkinFileExtensionPlugin,\
-      com.xpn.xwiki.plugin.skinx.CssSkinExtensionPlugin,\
-      com.xpn.xwiki.plugin.skinx.CssSkinFileExtensionPlugin,\
-      com.xpn.xwiki.plugin.skinx.LinkExtensionPlugin,\
-      com.xpn.xwiki.plugin.rightsmanager.RightsManagerPlugin
-    </xwikiCfgPlugins>
     <!-- Functional tests are allowed to output content to the console -->
     <xwiki.surefire.captureconsole.skip>true</xwiki.surefire.captureconsole.skip>
+    <!-- START: Required to fix conflicts resolution between XWiki & TestContainers -->
+    <!-- selenium-server requires Guava 25.0-jre+ but XWiki uses Guava 20.0, see xwiki-commons top level POM for more
+    details as to why we cannot use a more recent version. Thus we need to force a more recent version of Guava
+    here. Note that the version needs to be checked when we change the version of selenium-java -->
+    <guava.version>25.0-jre</guava.version>
+    <!-- END: Required to fix conflicts resolution between XWiki & TestContainers -->
   </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.xwiki.commons</groupId>
+        <artifactId>xwiki-commons-component-api</artifactId>
+        <version>${commons.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.commons</groupId>
+        <artifactId>xwiki-commons-configuration-api</artifactId>
+        <version>${commons.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.commons</groupId>
+        <artifactId>xwiki-commons-stability</artifactId>
+        <version>${commons.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.rendering</groupId>
+        <artifactId>xwiki-rendering-macro-html</artifactId>
+        <version>${rendering.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-rendering-macro-velocity</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-livetable-ui</artifactId>
+        <version>${platform.version}</version>
+        <type>xar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-rendering-macro-code</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-rendering-macro-include</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-rendering-macro-script</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <!-- The licensor module depends on an older version of XWiki so we need to make sure we're using the latest
+        version while running the tests. -->
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-skin-skinx</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-localization-script</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-extension-handler-xar</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-security-api</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-bridge</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <!-- The fake licensor (application-licensing-test-script) depends on an older version of XWiki so we need to make
+        sure we're using the latest version while running the tests. -->
+      <dependency>
+        <groupId>org.xwiki.commons</groupId>
+        <artifactId>xwiki-commons-script</artifactId>
+        <version>${commons.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.commons</groupId>
+        <artifactId>xwiki-commons-extension-api</artifactId>
+        <version>${commons.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.commons</groupId>
+        <artifactId>xwiki-commons-crypto-common</artifactId>
+        <version>${commons.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.commons</groupId>
+        <artifactId>xwiki-commons-crypto-pkix</artifactId>
+        <version>${commons.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-model</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-instance</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>application-flashmessages-ui</artifactId>
-      <version>${project.version}</version>
-      <type>xar</type>
-      <scope>runtime</scope>
-      <exclusions>
-        <!-- Run the functional tests without a license. -->
-        <exclusion>
-          <groupId>com.xwiki.licensing</groupId>
-          <artifactId>application-licensing-licensor-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
     <!-- Use a fake licensor script service while running the functional tests. -->
     <dependency>
       <groupId>com.xwiki.licensing</groupId>
       <artifactId>application-licensing-test-script</artifactId>
       <version>${licensing.version}</version>
-      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>application-flashmessages-ui</artifactId>
+      <version>${project.version}</version>
+      <type>xar</type>
     </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
@@ -84,21 +182,10 @@
       <version>${platform.version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- Make sure we have the Logback SLF4J binding for client side logging for our tests and make sure other logging
-         systems go through SLF4J -->
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-test-docker</artifactId>
+      <version>${platform.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -106,49 +193,9 @@
     <testSourceDirectory>src/test/it</testSourceDirectory>
     <plugins>
       <plugin>
-        <groupId>org.xwiki.platform</groupId>
-        <artifactId>xwiki-platform-tool-packager-plugin</artifactId>
-        <version>${platform.version}</version>
-        <executions>
-          <execution>
-            <phase>generate-test-resources</phase>
-            <goals>
-              <goal>package</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>clover</id>
-      <!-- Add the Clover JAR to the WAR so that it's available at runtime when XWiki executes.
-           It's needed because instrumented jars in the WAR will call Clover APIs at runtime when they execute. -->
-      <dependencies>
-        <dependency>
-          <groupId>com.cenqua.clover</groupId>
-          <artifactId>clover</artifactId>
-        </dependency>
-      </dependencies>
-      <build>
-        <plugins>
-          <!-- Add the Clover JAR to the Packager plugin runtime classpath since the Packager plugin uses java classes
-               that have been instrumented with Clover (XWiki oldcore for example) -->
-          <plugin>
-            <groupId>org.xwiki.platform</groupId>
-            <artifactId>xwiki-platform-tool-packager-plugin</artifactId>
-            <version>${platform.version}</version>
-            <dependencies>
-              <dependency>
-                <groupId>com.cenqua.clover</groupId>
-                <artifactId>clover</artifactId>
-                <version>${clover.version}</version>
-              </dependency>
-            </dependencies>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

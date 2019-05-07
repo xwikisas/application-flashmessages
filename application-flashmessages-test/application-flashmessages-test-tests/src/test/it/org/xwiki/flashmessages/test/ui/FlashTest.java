@@ -22,17 +22,20 @@ package org.xwiki.flashmessages.test.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.xwiki.flashmessages.test.po.*;
-import org.xwiki.test.ui.AbstractTest;
-import org.xwiki.test.ui.SuperAdminAuthenticationRule;
+import org.junit.Assert;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.xwiki.flashmessages.test.po.FlashEntryEditPage;
+import org.xwiki.flashmessages.test.po.FlashEntryViewPage;
+import org.xwiki.flashmessages.test.po.FlashHomePage;
+import org.xwiki.flashmessages.test.po.FlashPopup;
+import org.xwiki.flashmessages.test.po.FlashSlider;
+import org.xwiki.panels.test.po.ApplicationsPanel;
+import org.xwiki.test.docker.junit5.UITest;
+import org.xwiki.test.ui.TestUtils;
 import org.xwiki.test.ui.po.LiveTableElement;
 import org.xwiki.test.ui.po.ViewPage;
-import org.junit.Assert;
-import org.xwiki.panels.test.po.ApplicationsPanel;
 
 /**
  * UI tests for the Flash Messages application.
@@ -40,31 +43,30 @@ import org.xwiki.panels.test.po.ApplicationsPanel;
  * @version $Id$
  * @since
  */
-public class FlashTest extends AbstractTest
+@UITest
+public class FlashTest
 {
-    private FlashUtil flashUtil = FlashUtil.getInstance();
+    private FlashUtil flashUtil;
 
     private FlashTranslations translation = FlashTranslations.getInstance();
 
-    @Rule
-    public SuperAdminAuthenticationRule superAdmin = new SuperAdminAuthenticationRule(getUtil());
-
-    @BeforeClass
-    public static void createUsers()
+    @BeforeAll
+    public static void createUsers(TestUtils testUtils)
     {
         // Create administrator
-        getUtil().createUser("LightYagami", "justice", "email", "light.yagami@xwiki.org", "first_name", "Light", "last_name", "Yagami");
+        testUtils.createUser("LightYagami", "justice", "email", "light.yagami@xwiki.org", "first_name", "Light", "last_name", "Yagami");
         
         // Create normal user
-        getUtil().createUser("MisaAmane", "love", "email", "misa.amane@xwiki.org", "first_name", "Misa", "last_name", "Amane");
+        testUtils.createUser("MisaAmane", "love", "email", "misa.amane@xwiki.org", "first_name", "Misa", "last_name", "Amane");
     }
 
-    @Before
-    public void initialize() throws Exception
+    @BeforeEach
+    public void initialize(TestUtils testUtils) throws Exception
     {
+        flashUtil = FlashUtil.getInstance();
         setDefaultlanguage();
-        createXWikiAdminGroup();
-        createDefaultEntry();
+        createXWikiAdminGroup(testUtils);
+        createDefaultEntry(testUtils);
     }
 
     private void setDefaultlanguage()
@@ -72,16 +74,16 @@ public class FlashTest extends AbstractTest
         translation.setLanguage("en");
     }
 
-    private void createXWikiAdminGroup() throws Exception
+    private void createXWikiAdminGroup(TestUtils testUtils) throws Exception
     {
-        if (!getUtil().pageExists("XWiki", "XWikiAdminGroup")) {
+        if (!testUtils.pageExists("XWiki", "XWikiAdminGroup")) {
             // Add Light Yagami as member of XWikiAdminGroup
-            getUtil().addObject("XWiki", "XWikiAdminGroup", "XWiki.XWikiGroups");
-            getUtil().updateObject("XWiki", "XWikiAdminGroup", "XWiki.XWikiGroups", 0, "member", "XWiki.LightYagami");
+            testUtils.addObject("XWiki", "XWikiAdminGroup", "XWiki.XWikiGroups");
+            testUtils.updateObject("XWiki", "XWikiAdminGroup", "XWiki.XWikiGroups", 0, "member", "XWiki.LightYagami");
         }
     }
 
-    private void createDefaultEntry() throws Exception
+    private void createDefaultEntry(TestUtils testUtils) throws Exception
     {
         // Create the default entry object
 
@@ -98,8 +100,8 @@ public class FlashTest extends AbstractTest
             flashUtil.setDefaultEntry(defaultEntry);
         }
 
-        // Create the default entry document inside the wiki
-        if (!getUtil().pageExists("Flash", flashUtil.getDefaultEntry().getName())) {
+        // Create the default entry document inside the wiki	
+        if (!testUtils.pageExists("Flash", flashUtil.getDefaultEntry().getName())) {
             // Login as an administrator
             flashUtil.login("LightYagami", "justice");
 
@@ -115,7 +117,7 @@ public class FlashTest extends AbstractTest
             }
 
             // Re-authenticate as superadmin
-            superAdmin.authenticate();
+            testUtils.loginAsSuperAdmin();
         }
     }
 
@@ -235,7 +237,7 @@ public class FlashTest extends AbstractTest
     }
 
     @Test
-    public void testLocalization()
+    public void testLocalization(TestUtils testUtils)
     {
         FlashHomePage homePage;
         LiveTableElement liveTable;
@@ -246,10 +248,10 @@ public class FlashTest extends AbstractTest
         String entryPage = flashUtil.getDefaultEntryViewPage().getMetaDataValue("page");
 
         // Enable support for multiple languages
-        getUtil().addObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences");
-        getUtil().updateObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences", 0, "multilingual", 1);
-        getUtil().updateObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences", 0, "languages", "en,fr");
-        getUtil().updateObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences", 0, "default_language", "en");
+        testUtils.addObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences");
+        testUtils.updateObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences", 0, "multilingual", 1);
+        testUtils.updateObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences", 0, "languages", "en,fr");
+        testUtils.updateObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences", 0, "default_language", "en");
 
         for (String language : Arrays.asList("en", "fr")) {
             // Set the current language
