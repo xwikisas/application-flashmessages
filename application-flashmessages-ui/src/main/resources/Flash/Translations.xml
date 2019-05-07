@@ -49,7 +49,7 @@ flash.panels.quicklinktitle=Flash Messages
 flash.extension.name=Flash Messages Application (Pro)
 
 ## Livetable ##
-flash.livetable.doc.name=Name
+flash.livetable.doc.title=Name
 flash.livetable.dateBegin=Start date
 flash.livetable.dateEnd=End date
 flash.livetable.groups=Groups

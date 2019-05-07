@@ -245,7 +245,7 @@ public class FlashTest
         FlashEntryViewPage entryViewPage;
 
         // Get the default entry page name
-        String entryPage = flashUtil.getDefaultEntryViewPage().getMetaDataValue("page");
+        String entryPage = flashUtil.getDefaultEntryName();
 
         // Enable support for multiple languages
         testUtils.addObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences");
@@ -262,7 +262,7 @@ public class FlashTest
             Assert.assertEquals(homePage.getTitle(), translation.getKey("flash.home.title"));
             Assert.assertEquals(homePage.getInfoMessage(), translation.getKey("flash.home.msginfo"));
             liveTable = homePage.getLiveTable();
-            Assert.assertTrue(liveTable.hasColumn(translation.getKey("flash.livetable.doc.name")));
+            Assert.assertTrue(liveTable.hasColumn(translation.getKey("flash.livetable.doc.title")));
             Assert.assertTrue(liveTable.hasColumn(translation.getKey("flash.livetable.dateBegin")));
             Assert.assertTrue(liveTable.hasColumn(translation.getKey("flash.livetable.dateEnd")));
             Assert.assertTrue(liveTable.hasColumn(translation.getKey("flash.livetable.doc.date")));
@@ -315,7 +315,7 @@ public class FlashTest
 
         // Livetable
         LiveTableElement liveTable = homePage.getLiveTable();
-        Assert.assertTrue(liveTable.hasRow(translation.getKey("flash.livetable.doc.name"),
+        Assert.assertTrue(liveTable.hasRow(translation.getKey("flash.livetable.doc.title"),
             flashUtil.getDefaultEntryName()));
         Assert.assertTrue(liveTable.hasRow(translation.getKey("flash.livetable.dateBegin"),
             flashUtil.getDefaultEntryFormattedDateBegin()));
