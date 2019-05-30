@@ -29,11 +29,11 @@ import org.junit.jupiter.api.Test;
 import org.xwiki.flashmessages.test.po.FlashEntryEditPage;
 import org.xwiki.flashmessages.test.po.FlashEntryViewPage;
 import org.xwiki.flashmessages.test.po.FlashHomePage;
-import org.xwiki.flashmessages.test.po.FlashPopup;
 import org.xwiki.flashmessages.test.po.FlashSlider;
 import org.xwiki.panels.test.po.ApplicationsPanel;
 import org.xwiki.test.docker.junit5.UITest;
 import org.xwiki.test.ui.TestUtils;
+import org.xwiki.test.ui.po.ConfirmationModal;
 import org.xwiki.test.ui.po.LiveTableElement;
 import org.xwiki.test.ui.po.ViewPage;
 
@@ -43,7 +43,10 @@ import org.xwiki.test.ui.po.ViewPage;
  * @version $Id$
  * @since
  */
-@UITest
+@UITest(properties = {
+        // Add the RightsManagerPlugin which is needed by the test to get the groups of the current user.
+        "xwikiCfgPlugins=com.xpn.xwiki.plugin.rightsmanager.RightsManagerPlugin"
+})
 public class FlashTest
 {
     private FlashUtil flashUtil;
@@ -80,6 +83,10 @@ public class FlashTest
             // Add Light Yagami as member of XWikiAdminGroup
             testUtils.addObject("XWiki", "XWikiAdminGroup", "XWiki.XWikiGroups");
             testUtils.updateObject("XWiki", "XWikiAdminGroup", "XWiki.XWikiGroups", 0, "member", "XWiki.LightYagami");
+            testUtils.addObject("XWiki", "XWikiAdminGroup", "XWiki.XWikiRights",
+                    "groups", "XWikiAdminGroup",
+                    "levels", "edit",
+                    "allow", 1);
         }
     }
 
@@ -100,7 +107,7 @@ public class FlashTest
             flashUtil.setDefaultEntry(defaultEntry);
         }
 
-        // Create the default entry document inside the wiki	
+        // Create the default entry document inside the wiki
         if (!testUtils.pageExists("Flash", flashUtil.getDefaultEntry().getName())) {
             // Login as an administrator
             flashUtil.login("LightYagami", "justice");
@@ -112,7 +119,7 @@ public class FlashTest
             FlashEntryViewPage entryViewPage = flashUtil.getDefaultEntryViewPage();
 
             if (entryViewPage.hasPopup()) {
-                FlashPopup flashPopup = entryViewPage.getPopup();
+                ConfirmationModal flashPopup = entryViewPage.getPopup();
                 flashPopup.clickOk();
             }
 
@@ -244,8 +251,10 @@ public class FlashTest
         FlashEntryEditPage entryEditPage;
         FlashEntryViewPage entryViewPage;
 
+        testUtils.loginAsSuperAdmin();
+
         // Get the default entry page name
-        String entryPage = flashUtil.getDefaultEntryName();
+        String entryPage = flashUtil.getDefaultEntryViewPage().getMetaDataValue("page");
 
         // Enable support for multiple languages
         testUtils.addObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences");

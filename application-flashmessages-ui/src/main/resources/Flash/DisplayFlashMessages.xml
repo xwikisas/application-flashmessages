@@ -42,10 +42,6 @@
   <content>{{include reference="Flash.Macros"/}}
 
 {{velocity}}
-###############################################
-##           LOAD POPUP MANAGER
-###############################################
-#set($discard = $xwiki.jsx.use('Flash.FlashNotifier', {'minify':false}))
 ##
 ###############################################
 ##           LOAD MESSAGE SLIDER
@@ -188,9 +184,14 @@
     }
   #end
     ];
-    require(['jquery'], function($) {
-      window.flashNotifier(params);
+    require.config({
+      'paths': {
+         'flashNotifier': new XWiki.Document('FlashNotifier', 'Flash').getURL('jsx', 'r=1')
+       }
+    });
+    require(['jquery', 'flashNotifier', 'bootstrap'], function($) {
       window.flashPopup = $('#flashPopup');
+      window.flashNotifier(params);
     });
   });
   &lt;/script&gt;

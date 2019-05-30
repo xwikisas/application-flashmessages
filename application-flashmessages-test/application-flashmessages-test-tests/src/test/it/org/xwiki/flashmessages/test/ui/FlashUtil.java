@@ -29,8 +29,8 @@ import org.junit.Assert;
 import org.xwiki.flashmessages.test.po.FlashEntryEditPage;
 import org.xwiki.flashmessages.test.po.FlashEntryViewPage;
 import org.xwiki.flashmessages.test.po.FlashHomePage;
-import org.xwiki.flashmessages.test.po.FlashPopup;
 import org.xwiki.flashmessages.test.po.FlashSlider;
+import org.xwiki.test.ui.po.ConfirmationModal;
 import org.xwiki.test.ui.po.CreatePagePage;
 import org.xwiki.test.ui.po.ViewPage;
 
@@ -181,7 +181,7 @@ public class FlashUtil extends ViewPage
      */
     public FlashEntryViewPage createEntry(FlashEntry entry) throws Exception
     {
-        if (getUtil().pageExists(Arrays.asList("Flash", entry.getName()), "WebHome")) {
+        if (getUtil().pageExists("Flash", entry.getName())) {
             getUtil().deletePage("Flash", entry.getName());
         }
 
@@ -201,9 +201,8 @@ public class FlashUtil extends ViewPage
             entryEditPage.setRepeatFrequency(entry.getRepeatFrequency());
             entryEditPage.setRepeatDays(entry.getRepeatDays());
         }
-
-        entryEditPage.setGroups(entry.getGroups());
         entryEditPage.setMessage(entry.getMessage());
+        entryEditPage.setGroups(entry.getGroups());
 
         return entryEditPage.clickSaveAndView();
     }
@@ -329,15 +328,17 @@ public class FlashUtil extends ViewPage
         FlashEntryViewPage entryViewPage = createEntry(entry);
 
         // Check if the entry document was created
-        Assert.assertTrue(getUtil().pageExists(Arrays.asList("Flash", entry.getName()), "WebHome"));
+        Assert.assertTrue(getUtil().pageExists("Flash", entry.getName()));
 
         // Get the Flash Message view page
-        entryViewPage = FlashEntryViewPage.gotoPage(entry.getName());
+        entryViewPage = FlashEntryViewPage.gotoPage(entryViewPage.getMetaDataValue("page"));
 
         // Click the pop-up notification
         if (shouldBeInSlider && entryViewPage.hasPopup()) {
-            FlashPopup flashPopup = entryViewPage.getPopup();
-            entryViewPage = flashPopup.clickOk();
+            ConfirmationModal flashPopup = entryViewPage.getPopup();
+            flashPopup.clickOk();
+
+            entryViewPage = new FlashEntryViewPage();
             entryViewPage = entryViewPage.reload();
         }
 

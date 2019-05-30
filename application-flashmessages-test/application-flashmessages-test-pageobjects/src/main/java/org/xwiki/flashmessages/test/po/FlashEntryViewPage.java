@@ -19,11 +19,10 @@
  */
 package org.xwiki.flashmessages.test.po;
 
-import java.util.Arrays;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.xwiki.test.ui.po.ConfirmationModal;
 
 /**
  * Represents a Flash Messages entry page being viewed.
@@ -68,7 +67,7 @@ public class FlashEntryViewPage extends FlashPage
      */
     public static FlashEntryViewPage gotoPage(String page, String language)
     {
-        getUtil().gotoPage(Arrays.asList(FlashHomePage.getSpace(), page), "WebHome", "view", "language=" + language);
+        getUtil().gotoPage(FlashHomePage.getSpace(), page, "view", "language=" + language);
         return new FlashEntryViewPage();
     }
 
@@ -110,7 +109,7 @@ public class FlashEntryViewPage extends FlashPage
      */
     public Boolean hasPopup()
     {
-        return elementExists("my-modal-popup");
+        return elementExists("flashPopup");
     }
 
     /**
@@ -118,11 +117,9 @@ public class FlashEntryViewPage extends FlashPage
      * 
      * @return the FlashPopup element
      */
-    public FlashPopup getPopup()
+    public ConfirmationModal getPopup()
     {
-        getDriver().waitUntilElementIsVisible(By.id("my-modal-popup"));
-
-        return new FlashPopup();
+        return new ConfirmationModal(By.id("flashPopup"));
     }
 
     /**

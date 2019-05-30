@@ -163,7 +163,7 @@
       <cache>long</cache>
     </property>
     <property>
-      <code>require(['jquery'], function($) {
+      <code>define('flashNotifier', ['jquery'], function($) {
   /**
    * Initialize the flash notifier.
    */
@@ -182,13 +182,14 @@
     }
     // Get the params.
     var params = window.flashNotifierParams[window.flashNotifierIndex];
-    // Show the popup.
-    $(window).on('load', function() {
-      window.flashPopup.modal('show');
-    });
     // When window has already been loaded.
-    if(window.flashNotifierIndex &gt; 0) {
+    if(document.readyState === 'complete') {
       window.flashPopup.modal('show');
+    } else {
+      // Show the popup.
+      $(window).on('load', function() {
+        window.flashPopup.modal('show');
+      });
     }
   }
   /**
@@ -199,7 +200,7 @@
     url = new XWiki.Document('FlashNotifier', 'Flash').getURL('get');
     $.ajax({
       url : url,
-      data : {'ajax' : '1', 'flash' : params['document']},
+      data : {'ajax' : '1', 'flash' : params['document']}
     });
     window.flashNotifierIndex++;
     window.flashNotifierNext();
@@ -216,17 +217,7 @@
    * Save the fact that 'ok' button was clicked.
    */
   $(document).on('click', '#flashPopup input.btn-primary', function(event) {
-    $(this).data('clicked', true);
-  });
-  /**
-   * Check if we can show the next popup when the modal is closed.
-   */
-  $(document).on('hidden.bs.modal', '#flashPopup', function(event) {
-    var okButton = $('#flashPopup input.btn-primary');
-    if(okButton.data('clicked')) {
-      window.flashNotifierConfirm();
-      okButton.data('clicked', false);
-    }
+    window.flashNotifierConfirm();
   });
 });</code>
     </property>

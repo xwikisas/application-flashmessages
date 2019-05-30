@@ -30,6 +30,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.Select;
+import org.xwiki.test.ui.po.SuggestInputElement;
 import org.xwiki.test.ui.po.editor.DatePicker;
 
 /**
@@ -105,7 +106,7 @@ public class FlashEntryEditPage extends FlashPage
      */
     public static FlashEntryEditPage gotoPage(String page, String language)
     {
-        getUtil().gotoPage(Arrays.asList(FlashHomePage.getSpace(), page), "WebHome", "edit", "language=" + language);
+        getUtil().gotoPage(FlashHomePage.getSpace(), page, "edit", "language=" + language);
         return new FlashEntryEditPage();
     }
 
@@ -171,6 +172,7 @@ public class FlashEntryEditPage extends FlashPage
      */
     public void setRepeat(Boolean repeat)
     {
+        repeatElement.click();
         Select statusSelect = new Select(repeatElement);
         statusSelect.selectByValue(repeat ? "1" : "0");
     }
@@ -196,7 +198,9 @@ public class FlashEntryEditPage extends FlashPage
         List<WebElement> options = repeatIntervalElement.findElements(By.tagName("option"));
 
         for (WebElement option : options) {
-            repeatInterval.add(option.getAttribute("label"));
+            if(!("---".equals(option.getAttribute("label")))) {
+                repeatInterval.add(option.getAttribute("label"));
+            }
         }
 
         return repeatInterval;
@@ -293,12 +297,12 @@ public class FlashEntryEditPage extends FlashPage
      */
     public void setGroups(List<String> groups)
     {
+        SuggestInputElement picker = new SuggestInputElement(groupsElement);
+        picker.clearSelectedSuggestions();
         for (String group : groups) {
-            groupsElement.sendKeys(group);
-            getDriver().waitUntilElementIsVisible(By.className("suggestItem"));
-            getDriver().findElementWithoutWaiting(By.className("suggestItem")).click();
-            getDriver().waitUntilElementDisappears(By.className("suggestItem"));
+            picker.clear().sendKeys(group).waitForSuggestions().selectByIndex(0);
         }
+        picker.hideSuggestions();
     }
 
     /**
