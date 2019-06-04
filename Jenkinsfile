@@ -24,5 +24,9 @@
 // @Library("XWiki@<branch, tag, sha1>") _
 // See https://github.com/jenkinsci/workflow-cps-global-lib-plugin for details.
 
-xwikiModule {
+// Docker is required for the functional tests
+node('docker') {
+  xwikiBuild {
+    profiles = 'quality,docker'
+  }
 }
