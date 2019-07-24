@@ -54,7 +54,7 @@
   <scm>
     <connection>scm:git:git://github.com/xwikisas/application-flashmessages.git</connection>
     <developerConnection>scm:git:git@github.com:xwikisas/application-flashmessages.git</developerConnection>
-    <url>https://github.com/xwikisas/application-flashmessages/</url>
+    <url>https://github.com/xwikisas/application-flashmessages/tree/master</url>
     <tag>HEAD</tag>
   </scm>
 </project>
