@@ -257,28 +257,35 @@ function summary() {
   var repeatFrequency = document.getElementById('Flash.FlashClass_0_repeatFrequency').value;
   var repeatDays      = [].map.call(document.querySelectorAll('input[name="Flash.FlashClass_0_repeatDays"]:checked'), function(day) { return day.value });
 
-  new Ajax.Request
-  (
-    '$xwiki.getURL("Flash.RepeatSummaryService", "view")',
-    {
-      method: 'get',
-      parameters:
+  // When one of the required values is not selected, repeat summary will not be displayed.
+  var repeatSummaryField = document.getElementById('repeatSummary').parentElement.parentElement.classList;
+  if (!repeatInterval.blank() &amp;&amp; !repeatFrequency.blank()) {
+    repeatSummaryField.remove('hidden');
+    new Ajax.Request
+    (
+      '$xwiki.getURL("Flash.RepeatSummaryService", "view")',
       {
-        xpage: 'plain',
-        outputSyntax: 'plain',
-        date: startDate,
-        interval: repeatInterval,
-        frequency: repeatFrequency,
-        days: repeatDays.join(',')
-      },
-      onSuccess: function(transport) {
-        document.getElementById('repeatSummary').textContent = transport.responseText;
-      },
-      onFailure: function() {
-        document.getElementById('repeatSummary').textContent = '-';
+        method: 'get',
+        parameters:
+        {
+          xpage: 'plain',
+          outputSyntax: 'plain',
+          date: startDate,
+          interval: repeatInterval,
+          frequency: repeatFrequency,
+          days: repeatDays.join(',')
+        },
+        onSuccess: function(transport) {
+          document.getElementById('repeatSummary').textContent = transport.responseText;
+        },
+        onFailure: function() {
+          document.getElementById('repeatSummary').textContent = '-';
+        }
       }
-    }
-  );
+    );
+  } else {
+   repeatSummaryField.add('hidden');
+  }
 }</code>
     </property>
     <property>
