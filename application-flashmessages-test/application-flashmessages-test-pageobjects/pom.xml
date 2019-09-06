@@ -25,7 +25,7 @@
   <parent>
     <groupId>com.xwiki.flashmessages</groupId>
     <artifactId>application-flashmessages-test</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>1.4.7</version>
   </parent>
   <artifactId>application-flashmessages-test-pageobjects</artifactId>
   <name>Flash Messages Application (Pro) - Test - Page Objects</name>
