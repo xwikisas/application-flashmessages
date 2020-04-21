@@ -155,7 +155,8 @@
   #set ($wasSeenToday = $datetool.format($dateFormat, $dateNow) == $datetool.format($dateFormat, $seenDate))
   #set ($doRepeatEntry = $msgDoc.getObject('Flash.FlashClass').getValue('repeat') == 1)
   ## Check if the message was already seen by this user or if it wasn't seen today, for entries with repeat selected.
-  #if ((!$userValList.contains($msg.doc) &amp;&amp; !$msgValList.contains($xcontext.user)) || (!$wasSeenToday &amp;&amp; $doRepeatEntry))
+  #if ((!$userValList.contains($msg.doc) &amp;&amp; !$msgValList.contains($xcontext.user))
+      || (!$wasSeenToday &amp;&amp; $doRepeatEntry))
     #set ($discard = $need.add($msg.doc))
   #end
 #end
