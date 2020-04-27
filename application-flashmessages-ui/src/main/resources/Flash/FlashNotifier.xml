@@ -42,11 +42,10 @@
   <content>{{velocity}}
 ## Mark the message as seen by the current user
 #if("$!request.ajax" == '1' &amp;&amp; $xcontext.action == 'get')
-  #set($dateNow = $datetool.getSystemDate())
+  #set($dateNow = $datetool.date)
   #set($msgdoc = $xwiki.getDocument($request.flash))
   #set($userdoc = $xwiki.getDocument($xcontext.user))
   #if($userdoc &amp;&amp; !$userdoc.isNew() &amp;&amp; $xwiki.exists($msgdoc))
-    #set($dateFormat = $xwiki.getXWikiPreference('dateformat', 'dd/MM/yyyy'))
     ## Start by looking in the user document in order to ensure backwards compatibility
     #set($obj = $userdoc.getObject('Flash.FlashValidationClass'))
     #set($list = $obj.getProperty('flash').getValue())
@@ -67,6 +66,7 @@
       #end
     #end
     ## Check if the message should be marked as seen today.
+    #set($dateFormat = 'dd/MM/yyyy')
     #set ($msgObj = $msgdoc.getObject('Flash.FlashValidationClass'))
     #set ($seenDate = $msgObj.getValue('seenDate'))
     #set ($wasSeenToday = $datetool.format($dateFormat, $dateNow) == $datetool.format($dateFormat, $seenDate))
@@ -185,9 +185,7 @@
       window.flashPopup.modal('show');
     } else {
       // Show the popup.
-      $(window).on('load', function() {
-        window.flashPopup.modal('show');
-      });
+      $($.proxy(window.flashPopup, 'modal', 'show'));
     }
   }
   /**
@@ -237,6 +235,45 @@
     </property>
     <property>
       <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>Flash.FlashNotifier</name>
+    <number>0</number>
+    <className>XWiki.RequiredRightClass</className>
+    <guid>fc65af4c-2fa1-466e-9393-6264836d608b</guid>
+    <class>
+      <name>XWiki.RequiredRightClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <level>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>level</name>
+        <number>1</number>
+        <picker>0</picker>
+        <prettyName>level</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <sort>none</sort>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <values>edit|programming</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </level>
+    </class>
+    <property>
+      <level>programming</level>
     </property>
   </object>
   <object>

@@ -82,7 +82,6 @@
 ##            DISPLAY MESSAGES
 ###############################################
 #set($dateNow = $datetool.getSystemDate())
-#set($dateFormat = $xwiki.getXWikiPreference('dateformat', 'dd/MM/yyyy'))
 ##
 ## If the user is not in any group then no message should be displayed
 #if("$!groupsFilter" != '')
@@ -147,6 +146,7 @@
 #set($userValObj = $userDoc.getObject('Flash.FlashValidationClass'))
 #set($userValList = $userValObj.getProperty('flash').getValue())
 #set($need = [])
+#set($dateFormat = 'dd/MM/yyyy')
 #foreach ($msg in $events)
   #set ($msgDoc = $xwiki.getDocument($msg.doc))
   #set ($msgValObj = $msgDoc.getObject('Flash.FlashValidationClass'))
