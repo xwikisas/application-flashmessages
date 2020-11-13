@@ -32,7 +32,7 @@
   <version>1.5-SNAPSHOT</version>
   <name>Flash Messages Application (Pro) - Parent POM</name>
   <packaging>pom</packaging>
-  <description>Allows you to create Flash messages aiming at one or multiple local groups</description>
+  <description>Schedule and display flash announcements to one or multiple groups. Messages can be set as one off or recurring events. The app can be purchased individually or part of the XWiki Pro package. Try it free.</description>
    <properties>
     <licensing.version>1.16.1</licensing.version>
   </properties>
