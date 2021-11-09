@@ -27,19 +27,10 @@
     <artifactId>application-flashmessages-test</artifactId>
     <version>1.6.2-SNAPSHOT</version>
   </parent>
-  <artifactId>application-flashmessages-test-tests</artifactId>
-  <name>Flash Messages Application (Pro) - Test - Tests</name>
+  <artifactId>application-flashmessages-test-docker</artifactId>
+  <name>Flash Messages Application (Pro) - Test - Functional Docker Tests</name>
   <packaging>jar</packaging>
   <properties>
-    <xwikiCfgSuperadminPassword>pass</xwikiCfgSuperadminPassword>
-    <xwikiCfgPlugins>\
-      com.xpn.xwiki.plugin.skinx.JsSkinExtensionPlugin,\
-      com.xpn.xwiki.plugin.skinx.JsSkinFileExtensionPlugin,\
-      com.xpn.xwiki.plugin.skinx.CssSkinExtensionPlugin,\
-      com.xpn.xwiki.plugin.skinx.CssSkinFileExtensionPlugin,\
-      com.xpn.xwiki.plugin.skinx.LinkExtensionPlugin,\
-      com.xpn.xwiki.plugin.rightsmanager.RightsManagerPlugin
-    </xwikiCfgPlugins>
     <!-- Functional tests are allowed to output content to the console -->
     <xwiki.surefire.captureconsole.skip>true</xwiki.surefire.captureconsole.skip>
   </properties>
@@ -61,7 +52,7 @@
     <!-- Use a fake licensor script service while running the functional tests. -->
     <dependency>
       <groupId>com.xwiki.licensing</groupId>
-      <artifactId>application-licensing-test-script</artifactId>
+      <artifactId>application-licensing-test-api</artifactId>
       <version>${licensing.version}</version>
       <scope>runtime</scope>
     </dependency>
@@ -72,6 +63,12 @@
       <type>xar</type>
     </dependency>
     <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-test-docker</artifactId>
+      <version>${platform.version}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>application-flashmessages-test-pageobjects</artifactId>
@@ -84,44 +81,14 @@
       <version>${platform.version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- Make sure we have the Logback SLF4J binding for client side logging for our tests and make sure other logging
-         systems go through SLF4J -->
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
   <build>
     <testSourceDirectory>src/test/it</testSourceDirectory>
     <plugins>
+      <!-- We need to explicitly include the failsafe plugin since it's not part of the default maven lifecycle -->
       <plugin>
-        <groupId>org.xwiki.platform</groupId>
-        <artifactId>xwiki-platform-tool-packager-plugin</artifactId>
-        <version>${platform.version}</version>
-        <executions>
-          <execution>
-            <phase>generate-test-resources</phase>
-            <goals>
-              <goal>package</goal>
-            </goals>
-            <configuration>
-              <!-- The code from Flash.DisplayFlashMessages that is responsible for displaying the flash messages on any
-                page is using a query that needs programming rights. -->
-              <testProgrammingRights>false</testProgrammingRights>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
@@ -132,25 +99,25 @@
            It's needed because instrumented jars in the WAR will call Clover APIs at runtime when they execute. -->
       <dependencies>
         <dependency>
-          <groupId>com.cenqua.clover</groupId>
+          <groupId>org.openclover</groupId>
           <artifactId>clover</artifactId>
         </dependency>
       </dependencies>
       <build>
         <plugins>
-          <!-- Add the Clover JAR to the Packager plugin runtime classpath since the Packager plugin uses java classes
-               that have been instrumented with Clover (XWiki oldcore for example) -->
           <plugin>
-            <groupId>org.xwiki.platform</groupId>
-            <artifactId>xwiki-platform-tool-packager-plugin</artifactId>
-            <version>${platform.version}</version>
-            <dependencies>
-              <dependency>
-                <groupId>com.cenqua.clover</groupId>
-                <artifactId>clover</artifactId>
-                <version>${clover.version}</version>
-              </dependency>
-            </dependencies>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <systemProperties combine.children="append">
+                <!-- Tell the Docker-based test to activate the Clover profile so that the Clover JAR is added to
+                     WEB-INF/lib -->
+                <property>
+                  <name>xwiki.test.ui.profiles</name>
+                  <value>clover</value>
+                </property>
+              </systemProperties>
+            </configuration>
           </plugin>
         </plugins>
       </build>
