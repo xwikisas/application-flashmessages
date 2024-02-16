@@ -25,7 +25,7 @@
   <parent>
     <groupId>com.xwiki.flashmessages</groupId>
     <artifactId>application-flashmessages-test</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.2</version>
   </parent>
   <artifactId>application-flashmessages-test-docker</artifactId>
   <name>Flash Messages Application (Pro) - Test - Functional Docker Tests</name>
