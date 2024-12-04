@@ -6,7 +6,7 @@ Allows you to create Flash messages aiming at one or multiple local/global group
 * [Documentation](https://store.xwiki.com/xwiki/bin/view/Extension/FlashMessagesApplication)
 * Communication: [Mailing List](http://dev.xwiki.org/xwiki/bin/view/Community/MailingLists), [Chat](http://dev.xwiki.org/xwiki/bin/view/Community/Chat)
 * [Development Practices](http://dev.xwiki.org)
-* Minimal XWiki version supported: XWiki 13.10
+* Minimal XWiki version supported: XWiki 14.10
 * License: LGPL 2.1+.
 * Translations: N/A
 * Sonar Dashboard: N/A
