@@ -50,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @since 1.7
  */
 @UITest(
+    //TODO After the licensing app has 14.10+ as its parent, remove the overrides and the extra jars.
     extensionOverrides = {
         @ExtensionOverride(
             extensionId = "com.google.code.findbugs:jsr305",
