@@ -29,7 +29,7 @@
   </parent>
   <groupId>com.xwiki.flashmessages</groupId>
   <artifactId>application-flashmessages</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <version>1.8</version>
   <name>Flash Messages Application (Pro) - Parent POM</name>
   <packaging>pom</packaging>
   <description>Schedule and display flash announcements to one or multiple groups. Messages can be set as one off or recurring events. The app can be purchased individually or part of the XWiki Pro package. Try it free.</description>
@@ -55,6 +55,6 @@
     <connection>scm:git:git://github.com/xwikisas/application-flashmessages.git</connection>
     <developerConnection>scm:git:git@github.com:xwikisas/application-flashmessages.git</developerConnection>
     <url>https://github.com/xwikisas/application-flashmessages/tree/master</url>
-    <tag>HEAD</tag>
+    <tag>application-flashmessages-1.8</tag>
   </scm>
 </project>
