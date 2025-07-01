@@ -412,9 +412,23 @@
     </property>
     <property>
       <content>{{velocity}}
-#if($xcontext.action == 'view' &amp;&amp; $xwiki.hasAccessLevel('view', $xcontext.userReference, 'Flash.DisplayFlashMessages'))
-  {{include reference='Flash.DisplayFlashMessages' /}}
+{{html}}
+$flashMessagesUIXPDisplayed
+$xcontext.action
+$xwiki.hasAccessLevel('view', $xcontext.userReference, 'Flash.DisplayFlashMessages')
+$xwiki.exists('Flash.DisplayFlashMessages')
+{{/html}}
+#set ($mainWiki = 'xwiki')
+#if($flashMessagesUIXPDisplayed != 1 &amp;&amp; $xcontext.action == 'view')
+  #if ($xwiki.exists('Flash.DisplayFlashMessages') &amp;&amp; $xwiki.hasAccessLevel('view', $xcontext.userReference, 'Flash.DisplayFlashMessages'))
+    {{include reference='Flash.DisplayFlashMessages' /}}
+  #elseif ($xwiki.exists("$mainWiki:Flash.DisplayFlashMessages") &amp;&amp; $xwiki.hasAccessLevel('view', $xcontext.userReference, "$mainWiki:Flash.DisplayFlashMessages"))
+    ## This breaks the DisplayFlashMessages page, because it is looking for the pages in the current wiki.
+    ## TODO FIXME Fix this: Either add a wiki parameter, force install on main wiki always, or do something more complex.
+    {{include reference='xwiki:Flash.DisplayFlashMessages' /}}
+  #end
 #end
+#set ($flashMessagesUIXPDisplayed = 1)
 {{/velocity}}</content>
     </property>
     <property>
@@ -427,7 +441,7 @@
       <parameters/>
     </property>
     <property>
-      <scope>wiki</scope>
+      <scope>global</scope>
     </property>
   </object>
 </xwikidoc>

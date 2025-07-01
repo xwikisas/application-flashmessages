@@ -236,6 +236,58 @@
       <values>daily|weekly|monthly|yearly</values>
       <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
     </repeatInterval>
+    <subwikis>
+      <cache>0</cache>
+      <customDisplay>{{velocity output="false"}}
+#template("pickers_macros.vm")
+{{/velocity}}
+{{velocity}}
+#if ($type == 'edit')
+    #set ($options = [{'name': $services.localization.render('flash.subwikis.empty'), 'value': ''}])
+    #foreach ($subwiki in $services.wiki.getAll())
+      #if ($xcontext.hasAccessLevel('admin', "${subwiki.getId()}:XWiki.XWikiPreferences"))
+        #set ($discard = $options.add({ 'name': $subwiki.getPrettyName(), 'value': $subwiki.getId()}))
+      #end
+    #end
+    #set ($parameters = {
+      'name': "${object.getxWikiClass().name}_${object.number}_${name}",
+      'value': $value,
+      'multiple': 'multiple',
+      'prefix': ' ',
+      'options': $options
+    })
+{{html}}
+    #staticSelectPicker($parameters)
+{{/html}}
+#elseif ($type == 'view')
+  #foreach ($subwiki in $value)
+    #set ($subwiki = $services.wiki.getById($subwiki))##
+[[$services.rendering.escape($services.rendering.escape($subwiki.getPrettyName(), 'xwiki/2.1'), 'xwiki/2.1')&gt;&gt;$services.rendering.escape($subwiki.getMainPageReference(), 'xwiki/2.1')]] ##
+  #end
+#end
+{{/velocity}}</customDisplay>
+      <defaultValue/>
+      <disabled>0</disabled>
+      <displayType>select</displayType>
+      <freeText/>
+      <hint>Only wikis you have Admin rights on are listed.</hint>
+      <largeStorage>0</largeStorage>
+      <multiSelect>1</multiSelect>
+      <name>subwikis</name>
+      <number>9</number>
+      <picker>1</picker>
+      <prettyName>Subwikis</prettyName>
+      <relationalStorage>0</relationalStorage>
+      <separator> </separator>
+      <separators>|, </separators>
+      <size>1</size>
+      <sort/>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <values/>
+      <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+    </subwikis>
   </class>
   <object>
     <name>Flash.FlashClass</name>

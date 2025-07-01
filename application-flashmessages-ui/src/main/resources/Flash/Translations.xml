@@ -77,6 +77,8 @@ Flash.FlashClass_repeatDays_saturday=Saturday
 Flash.FlashClass_repeatDays_sunday=Sunday
 Flash.FlashClass_message=Message
 Flash.FlashClass_groups=Groups
+Flash.FlashClass_subwikis=Subwikis
+flash.subwikis.empty=None
 
 ## Sheet ##
 flash.repeat.summary=Repeat summary

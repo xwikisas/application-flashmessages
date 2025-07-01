@@ -35,6 +35,7 @@
   <description>Schedule and display flash announcements to one or multiple groups. Messages can be set as one off or recurring events. The app can be purchased individually or part of the XWiki Pro package. Try it free.</description>
    <properties>
     <licensing.version>1.27</licensing.version>
+     <xwikiprocommons.version>1.0.4</xwikiprocommons.version>
   </properties>
   <modules>
     <module>application-flashmessages-ui</module>

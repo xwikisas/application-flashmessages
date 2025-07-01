@@ -81,7 +81,7 @@
 ##
 ## If the user is not in any group then no message should be displayed
 #if("$!groupsFilter" != '')
-  #set($baseQuery = "select doc.fullName, obj.dateBegin {0} from Document doc, doc.object(Flash.FlashClass) as obj WHERE doc.fullName &lt;&gt; 'Flash.FlashTemplate' $!groupsFilter AND obj.dateBegin &lt;= :now AND (obj.dateEnd is null OR obj.dateEnd &gt; :now) {1} ORDER BY obj.dateBegin DESC")
+  #set($baseQuery = "select doc.fullName, obj.dateBegin {0}, obj.subwikis from Document doc, doc.object(Flash.FlashClass) as obj WHERE doc.fullName &lt;&gt; 'Flash.FlashTemplate' $!groupsFilter AND obj.dateBegin &lt;= :now AND (obj.dateEnd is null OR obj.dateEnd &gt; :now) {1} ORDER BY obj.dateBegin DESC")
   ##
   #set($nonRecurringQuery = $baseQuery.replace("{0}", "").replace("{1}", "AND (obj.repeat is null OR obj.repeat = 0)"))
   #set($nonRecurring = $services.query.xwql($nonRecurringQuery).bindValue('now', $dateNow).setLimit(3).execute())
@@ -91,7 +91,10 @@
   ##
   #set($events = [])
   #foreach($event in $nonRecurring)
-    #set($discard = $events.add({'doc' : $event[0], 'date' : $event[1]}))
+    #set ($subwikis = $stringtool.split($event[2], '|'))
+    #if ($subwikis.contains($doc.getWiki()))
+      #set($discard = $events.add({'doc' : $event[0], 'date' : $event[1]}))
+    #end
   #end
   ##
   #foreach($event in $recurring)
@@ -100,17 +103,18 @@
     #set($repeatInterval  = $event[2])
     #set($repeatFrequency = $numbertool.integer($event[3]))
     #set($repeatDays      = $stringtool.split($event[4], '|'))
+    #set ($subwikis       = $stringtool.split($event[5], '|'))
     ##
     #set($today           = $datetool)
     #set($dayOfTheWeek    = $stringtool.lowerCase($datetool.format('EEEE', $today)))
     #set($dateDiff        = $datetool.difference($date, $today))
     ##
-    #if(
+    #if($subwikis.contains($doc.getWiki()) &amp;&amp; (
       ($repeatInterval == 'daily'   &amp;&amp; $mathtool.mod($dateDiff.days,   $repeatFrequency) == 0) ||
       ($repeatInterval == 'weekly'  &amp;&amp; $mathtool.mod($dateDiff.weeks,  $repeatFrequency) == 0 &amp;&amp; $repeatDays.contains($dayOfTheWeek)) ||
       ($repeatInterval == 'monthly' &amp;&amp; $mathtool.mod($dateDiff.months, $repeatFrequency) == 0 &amp;&amp; $datetool.format('d', $date) == $datetool.format('d', $today)) ||
       ($repeatInterval == 'yearly'  &amp;&amp; $mathtool.mod($dateDiff.years,  $repeatFrequency) == 0 &amp;&amp; $datetool.format('Md', $date) == $datetool.format('Md', $today))
-    )
+    ))
       #set($discard = $events.add({'doc' : $document, 'date' : $date}))
     #end
   #end
