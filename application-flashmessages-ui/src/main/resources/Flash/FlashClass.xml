@@ -240,8 +240,7 @@
       <cache>0</cache>
       <customDisplay>{{velocity output="false"}}
 #template("pickers_macros.vm")
-{{/velocity}}
-{{velocity}}
+{{/velocity}}{{velocity}}
 #if ($type == 'edit')
     #set ($options = [{'name': $services.localization.render('flash.subwikis.empty'), 'value': ''}])
     #foreach ($subwiki in $services.wiki.getAll())

@@ -89,6 +89,7 @@ flash.repeat.summary.daily=days
 flash.repeat.summary.weekly=weeks
 flash.repeat.summary.monthly=months
 flash.repeat.summary.yearly=years
+flash.banner.subwikis.none=This flash message has no subwikis set, so it won't be displayed.
 
 ## Template Provider ##
 templateProvider.flashmessages.name=Flash Messages
