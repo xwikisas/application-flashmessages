@@ -36,15 +36,27 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>{{include reference="Flash.Macros"/}}
-
-{{velocity}}
+  <content>{{velocity}}
+#set ($searchFlashInstallation = $collectiontool.getOrderedSet())
+## Custom configurations for the app will be applied from the local wiki, then main wiki, then any other place where the FlashMessages app is installed.
+#set ($discard = $searchFlashInstallation.addAll([$doc.getWiki(), $services.wiki.getMainWikiId()]))
+#set ($discard = $searchFlashInstallation.addAll($services.wiki.getAllIds()))
+#set ($flashInstallSubwikis = [])
+#foreach ($subwiki in $searchFlashInstallation)
+  #if ($xwiki.exists("$subwiki:Flash.DisplayFlashMessages") &amp;&amp; $xwiki.hasAccessLevel('view', $xcontext.userReference, "$subwiki:Flash.DisplayFlashMessages"))
+    #set ($discard = $flashInstallSubwikis.add($subwiki))
+  #end
+#end
+## The subwiki to use as the source of the extension documents, css, jsx.
+#set ($flashInstallSubwiki = $flashInstallSubwikis.get(0))
+{{include reference="$flashInstallSubwiki:Flash.Macros"/}}
 ##
 ###############################################
 ##           LOAD MESSAGE SLIDER
 ###############################################
-#set($discard = $xwiki.jsx.use('Flash.DisplayFlashMessages'))
-#set($discard = $xwiki.ssx.use('Flash.DisplayFlashMessages'))
+#set ($discard = $xwiki.jsx.use("$flashInstallSubwiki:Flash.FlashNotifier"))
+#set ($discard = $xwiki.jsx.use("$flashInstallSubwiki:Flash.DisplayFlashMessages"))
+#set ($discard = $xwiki.ssx.use("$flashInstallSubwiki:Flash.DisplayFlashMessages"))
 ##
 ###############################################
 ##           Group filter
@@ -61,18 +73,6 @@
   ## Local users are normally included only in local groups (from the same wiki).
   #set ($groups = $services.user.group.getGroupsFromMemberWiki($xcontext.userReference))
 #end
-#set ($groupsFilter = [])
-#foreach ($groupReference in $groups)
-  ## Remove the wiki component from the group reference if it matches the current wiki (where we look for flash
-  ## messages) because that's what we save in the groups property of flash messages.
-  #set ($compactGroupReference = $services.model.serialize($groupReference, 'compactwiki'))
-  #set ($discard = $groupsFilter.add("'$compactGroupReference' member of obj.groups"))
-#end
-#if ($groupsFilter.size() &gt; 0)
-  #set ($groupsFilter = " AND ($stringtool.join($groupsFilter, ' OR ')) ")
-#else
-  #set ($groupsFilter = '')
-#end
 ##
 ###############################################
 ##            DISPLAY MESSAGES
@@ -80,63 +80,85 @@
 #set($dateNow = $datetool.getSystemDate())
 ##
 ## If the user is not in any group then no message should be displayed
-#if("$!groupsFilter" != '')
-  #set($baseQuery = "select doc.fullName, obj.dateBegin {0}, obj.subwikis from Document doc, doc.object(Flash.FlashClass) as obj WHERE doc.fullName &lt;&gt; 'Flash.FlashTemplate' $!groupsFilter AND obj.dateBegin &lt;= :now AND (obj.dateEnd is null OR obj.dateEnd &gt; :now) {1} ORDER BY obj.dateBegin DESC")
-  ##
-  #set($nonRecurringQuery = $baseQuery.replace("{0}", "").replace("{1}", "AND (obj.repeat is null OR obj.repeat = 0)"))
-  #set($nonRecurring = $services.query.xwql($nonRecurringQuery).bindValue('now', $dateNow).setLimit(3).execute())
-  ##
-  #set($recurringQuery = $baseQuery.replace("{0}", ", obj.repeatInterval, obj.repeatFrequency, obj.repeatDays ").replace("{1}", "AND obj.repeat = 1"))
-  #set($recurring = $services.query.xwql($recurringQuery).bindValue('now', $dateNow).execute())
-  ##
+#if($groups.size() &gt; 0)
   #set($events = [])
-  #foreach($event in $nonRecurring)
-    #set ($subwikis = $stringtool.split($event[2], '|'))
-    #if ($subwikis.contains($doc.getWiki()))
-      #set($discard = $events.add({'doc' : $event[0], 'date' : $event[1]}))
+  ## Go through all subwikis which have the FlashMessages app installed.
+  #foreach ($currentWiki in $flashInstallSubwikis)
+    #set ($groupsFilter = [])
+    #foreach ($groupReference in $groups)
+      ## Remove the wiki component from the group reference if it matches the current wiki (where we look for flash
+      ## messages) because that's what we save in the groups property of flash messages.
+      #if ("$groupReference.getWikiReference().getName()" == $currentWiki)
+        #set ($compactGroupReference = $services.model.serialize($groupReference, 'local'))
+      #else
+        #set ($compactGroupReference = $services.model.serialize($groupReference, 'default'))
+      #end
+      #set ($discard = $groupsFilter.add("'$compactGroupReference' member of obj.groups"))
     #end
-  #end
-  ##
-  #foreach($event in $recurring)
-    #set($document        = $event[0])
-    #set($date            = $event[1])
-    #set($repeatInterval  = $event[2])
-    #set($repeatFrequency = $numbertool.integer($event[3]))
-    #set($repeatDays      = $stringtool.split($event[4], '|'))
-    #set ($subwikis       = $stringtool.split($event[5], '|'))
+    #if ($groupsFilter.size() &gt; 0)
+      #set ($groupsFilter = " AND ($stringtool.join($groupsFilter, ' OR ')) ")
+    #else
+      #set ($groupsFilter = '')
+    #end
     ##
-    #set($today           = $datetool)
-    #set($dayOfTheWeek    = $stringtool.lowerCase($datetool.format('EEEE', $today)))
-    #set($dateDiff        = $datetool.difference($date, $today))
+    #set ($baseQuery = "select doc.fullName, obj.dateBegin {0}, obj.subwikis from Document doc, doc.object(Flash.FlashClass) as obj WHERE doc.fullName &lt;&gt; 'Flash.FlashTemplate' $!groupsFilter AND obj.dateBegin &lt;= :now AND (obj.dateEnd is null OR obj.dateEnd &gt; :now) {1} ORDER BY obj.dateBegin DESC")
+    #set ($nonRecurringQuery = $baseQuery.replace("{0}", "").replace("{1}", "AND (obj.repeat is null OR obj.repeat = 0)"))
+    #set ($nonRecurring = $services.query.xwql($nonRecurringQuery).bindValue('now', $dateNow).setLimit(3).setWiki($currentWiki).execute())
     ##
-    #if($subwikis.contains($doc.getWiki()) &amp;&amp; (
-      ($repeatInterval == 'daily'   &amp;&amp; $mathtool.mod($dateDiff.days,   $repeatFrequency) == 0) ||
-      ($repeatInterval == 'weekly'  &amp;&amp; $mathtool.mod($dateDiff.weeks,  $repeatFrequency) == 0 &amp;&amp; $repeatDays.contains($dayOfTheWeek)) ||
-      ($repeatInterval == 'monthly' &amp;&amp; $mathtool.mod($dateDiff.months, $repeatFrequency) == 0 &amp;&amp; $datetool.format('d', $date) == $datetool.format('d', $today)) ||
-      ($repeatInterval == 'yearly'  &amp;&amp; $mathtool.mod($dateDiff.years,  $repeatFrequency) == 0 &amp;&amp; $datetool.format('Md', $date) == $datetool.format('Md', $today))
-    ))
-      #set($discard = $events.add({'doc' : $document, 'date' : $date}))
+    #set ($recurringQuery = $baseQuery.replace("{0}", ", obj.repeatInterval, obj.repeatFrequency, obj.repeatDays ").replace("{1}", "AND obj.repeat = 1"))
+    #set ($recurring = $services.query.xwql($recurringQuery).bindValue('now', $dateNow).setWiki($currentWiki).execute())
+    ##
+    #foreach($event in $nonRecurring)
+      #set ($subwikis = $stringtool.split($event[2], '|'))
+      #if ($subwikis.contains($doc.getWiki()))
+        #set($discard = $events.add({'doc' : "$currentWiki:$event[0]", 'date' : $event[1]}))
+      #end
+    #end
+    ##
+    #foreach($event in $recurring)
+      #set($document        = $event[0])
+      #set($date            = $event[1])
+      #set($repeatInterval  = $event[2])
+      #set($repeatFrequency = $numbertool.integer($event[3]))
+      #set($repeatDays      = $stringtool.split($event[4], '|'))
+      #set ($subwikis       = $stringtool.split($event[5], '|'))
+      ##
+      #set($today           = $datetool)
+      #set($dayOfTheWeek    = $stringtool.lowerCase($datetool.format('EEEE', $today)))
+      #set($dateDiff        = $datetool.difference($date, $today))
+      ##
+      #if($subwikis.contains($doc.getWiki()) &amp;&amp; (
+        ($repeatInterval == 'daily'   &amp;&amp; $mathtool.mod($dateDiff.days,   $repeatFrequency) == 0) ||
+        ($repeatInterval == 'weekly'  &amp;&amp; $mathtool.mod($dateDiff.weeks,  $repeatFrequency) == 0 &amp;&amp; $repeatDays.contains($dayOfTheWeek)) ||
+        ($repeatInterval == 'monthly' &amp;&amp; $mathtool.mod($dateDiff.months, $repeatFrequency) == 0 &amp;&amp; $datetool.format('d', $date) == $datetool.format('d', $today)) ||
+        ($repeatInterval == 'yearly'  &amp;&amp; $mathtool.mod($dateDiff.years,  $repeatFrequency) == 0 &amp;&amp; $datetool.format('Md', $date) == $datetool.format('Md', $today))
+      ))
+        #set($discard = $events.add({'doc' : "$currentWiki:$document", 'date' : $date}))
+      #end
     #end
   #end
   ##
   #set($events = $collectiontool.sort($events, 'date:desc'))
   ##
   #if($events.size() &gt; 0)
-    {{html}}
+
+    {{html wiki="true"}}
       &lt;div id="flashMessages"&gt;
         &lt;ul class="messages"&gt;
           #foreach($r in $events)
             #set($document = $xwiki.getDocument($r.doc))
             #set($obj = $document.getObject('Flash.FlashClass'))
             &lt;li class="unit"&gt;
-              &lt;span class="date"&gt;$!obj.display('dateBegin', 'view') : &lt;/span&gt;
-              &lt;span class="message"&gt;$!obj.display('message', 'view')&lt;/span&gt;
+              &lt;span class="subwiki"&gt;[[$document.getWiki()&gt;&gt;$!services.wiki.getById($document.getWiki()).getMainPageReference()]]&lt;/span&gt;
+              &lt;span class="date"&gt;$!services.rendering.escape($!obj.display('dateBegin', 'view'), 'xwiki/2.1') : &lt;/span&gt;
+              &lt;span class="message"&gt;$!services.rendering.escape($!obj.display('message', 'view'), 'xwiki/2.1')&lt;/span&gt;
             &lt;/li&gt;
           #end
         &lt;/ul&gt;
         &lt;ul class="navigation"&gt;&lt;/ul&gt;
       &lt;/div&gt;
     {{/html}}
+
   #end
 #end
 ###############################################
@@ -182,14 +204,20 @@
     }
   #end
     ];
-    require.config({
-      'paths': {
-         'flashNotifier': new XWiki.Document('FlashNotifier', 'Flash').getURL('jsx', 'r=1')
-       }
-    });
-    require(['jquery', 'flashNotifier', 'bootstrap'], function($) {
-      window.flashPopup = $('#flashPopup');
-      window.flashNotifier(params);
+    // This is a workaround for https://jira.xwiki.org/browse/XWIKI-20623 : JS function XWiki.Document#getURL does not take into account the wiki name
+    fetch('/xwiki/rest/wikis').then(res =&gt; res.json())
+    .then(data =&gt; {
+      let flashNotifierUrl = '/xwiki/__subwiki__/jsx/Flash/FlashNotifier?r=1';
+      flashNotifierUrl = flashNotifierUrl.replace('__subwiki__', data.wikis.size() &gt; 1 ? 'wiki/$flashInstallSubwiki' : 'bin');
+      require.config({
+        'paths': {
+           'flashNotifier': flashNotifierUrl
+         }
+      });
+      require(['jquery', 'flashNotifier', 'bootstrap'], function($) {
+        window.flashPopup = $('#flashPopup');
+        window.flashNotifier(params);
+      });
     });
   });
   &lt;/script&gt;
