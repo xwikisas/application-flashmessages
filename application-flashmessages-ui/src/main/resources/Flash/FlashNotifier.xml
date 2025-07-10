@@ -412,7 +412,8 @@
     </property>
     <property>
       <content>{{velocity}}
-#if(!$flashInstallSubwiki &amp;&amp; $xcontext.action == 'view')
+#if(!$flashMessagesUIXPDisplayed &amp;&amp; $xcontext.action == 'view')
+  #set ($flashMessagesUIXPDisplayed = 1)
   #set ($searchFlashInstallation = $collectiontool.getOrderedSet())
   ## Custom configurations for the app will be applied from the local wiki, then main wiki, then any other place where the FlashMessages app is installed.
   #set ($discard = $searchFlashInstallation.addAll([$doc.getWiki(), $services.wiki.getMainWikiId()]))
@@ -420,13 +421,13 @@
   #set ($flashInstallSubwikis = [])
   #foreach ($subwiki in $searchFlashInstallation)
     #if ($xwiki.exists("$subwiki:Flash.DisplayFlashMessages") &amp;&amp; $xwiki.hasAccessLevel('view', $xcontext.userReference, "$subwiki:Flash.DisplayFlashMessages"))
-      #set ($flashInstallSubwiki = $subwiki)
-      #break
+      #set ($discard = $flashInstallSubwikis.add($subwiki))
     #end
   #end
+  ## The subwiki to use as the source of the extension documents, css, jsx.
+  #set ($flashInstallSubwiki = $flashInstallSubwikis.get(0))
   {{include reference='$flashInstallSubwiki:Flash.DisplayFlashMessages' /}}
 #end
-#set ($flashMessagesUIXPDisplayed = 1)
 {{/velocity}}</content>
     </property>
     <property>

@@ -37,19 +37,8 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-#set ($searchFlashInstallation = $collectiontool.getOrderedSet())
-## Custom configurations for the app will be applied from the local wiki, then main wiki, then any other place where the FlashMessages app is installed.
-#set ($discard = $searchFlashInstallation.addAll([$doc.getWiki(), $services.wiki.getMainWikiId()]))
-#set ($discard = $searchFlashInstallation.addAll($services.wiki.getAllIds()))
-#set ($flashInstallSubwikis = [])
-#foreach ($subwiki in $searchFlashInstallation)
-  #if ($xwiki.exists("$subwiki:Flash.DisplayFlashMessages") &amp;&amp; $xwiki.hasAccessLevel('view', $xcontext.userReference, "$subwiki:Flash.DisplayFlashMessages"))
-    #set ($discard = $flashInstallSubwikis.add($subwiki))
-  #end
-#end
-## The subwiki to use as the source of the extension documents, css, jsx.
-#set ($flashInstallSubwiki = $flashInstallSubwikis.get(0))
-{{include reference="$flashInstallSubwiki:Flash.Macros"/}}
+## Variables $flashInstallSubwiki, $searchFlashInstallation are defined in Flash.FlashNotifier,
+## which includes this document.
 ##
 ###############################################
 ##           LOAD MESSAGE SLIDER
@@ -184,7 +173,6 @@
 #end
 #if(!$need.empty())
   ##
-
   {{html clean="false"}}
   &lt;script language="javascript"&gt;
   document.observe('xwiki:dom:loaded', function(){
@@ -224,7 +212,25 @@
   {{/html}}
 
 #end
-#showFlashPopup()
+{{html clean="false"}}
+&lt;div class="modal fade" id="flashPopup" tabindex="-1" role="dialog" aria-hidden="true"&gt;
+  &lt;div class="modal-dialog"&gt;
+    &lt;div class="modal-content"&gt;
+      &lt;div class="modal-header"&gt;
+        &lt;button type="button" class="close" data-dismiss="modal"&gt;&amp;times;&lt;/button&gt;
+        &lt;h4 class="modal-title"&gt;&lt;/h4&gt;
+      &lt;/div&gt;
+      &lt;div class="modal-body"&gt;
+        &lt;div&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="modal-footer"&gt;
+        &lt;input type="button" class="btn btn-primary" disabled="disabled"
+          value="$escapetool.xml($services.localization.render('flash.flashmessages.confirm'))"/&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{{/html}}
 {{/velocity}}</content>
   <object>
     <name>Flash.DisplayFlashMessages</name>
