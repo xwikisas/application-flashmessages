@@ -156,7 +156,7 @@
 ##            DISPLAY ALERT
 ###############################################
 #set($userDoc = $xwiki.getDocument($xcontext.user))
-#set ($userLocalString = services.model.serialize($userDoc, 'local'))
+#set ($userLocalString = $services.model.serialize($userDoc, 'local'))
 #set($userValObj = $userDoc.getObject('Flash.FlashValidationClass'))
 #set($userValList = $userValObj.getProperty('flash').getValue())
 #set($need = [])
