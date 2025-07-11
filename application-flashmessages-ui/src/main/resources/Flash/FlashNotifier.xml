@@ -198,15 +198,23 @@
    */
   window.flashNotifierConfirm = function() {
     let params = window.flashNotifierParams[window.flashNotifierIndex];
-    url = new XWiki.Document('FlashNotifier', 'Flash').getURL('get');
-    return $.ajax({
-      url : url,
-      data : {'ajax' : '1', 'flash' : params['document']}
-    }).done(function() {
-      // Show the next popup when the current one is closed.
-      $(document).one('hidden.bs.modal', '#flashPopup', function(event) {
-        window.flashNotifierIndex++;
-        window.flashNotifierNext();
+    // Workaround for XWIKI-20623 : JS function XWiki.Document#getURL does not take into account the wiki name.
+    return fetch('/xwiki/rest/wikis').then(res =&gt; res.text())
+    .then(data =&gt; {
+      data = (new DOMParser()).parseFromString(data, "text/xml");
+      let wikis = Array.from(data.activeElement.getElementsByTagName('id')).map(a =&gt; a.innerHTML);
+      let flashNotifierUrl = '/xwiki/__subwiki__/get/Flash/FlashNotifier';
+      flashNotifierUrl = flashNotifierUrl.replace('__subwiki__', wikis.length &gt; 1 ? 'wiki/$doc.getWiki()' : 'bin');
+      // End workaround.
+      return $.ajax({
+        url : flashNotifierUrl,
+        data : {'ajax' : '1', 'flash' : params['document']}
+      }).done(function() {
+        // Show the next popup when the current one is closed.
+        $(document).one('hidden.bs.modal', '#flashPopup', function(event) {
+          window.flashNotifierIndex++;
+          window.flashNotifierNext();
+        });
       });
     });
   };
@@ -226,10 +234,10 @@
   $(document).on('click', '#flashPopup input.btn-primary', function(event) {
     var okButton = $(this).prop('disabled', true);
     // Wait for the confirmation request to succeed and only then hide the popup.
-    window.flashNotifierConfirm().done(function() {
+    window.flashNotifierConfirm().then(function() {
       // Hide the current popup and possibly trigger the next popup.
       window.flashPopup.modal('hide');
-    }).fail(function() {
+    }).catch(function() {
       // Re-enable the OK button in case the confirmation request failed.
       okButton.prop('disabled', false);
     });
@@ -412,15 +420,26 @@
     </property>
     <property>
       <content>{{velocity}}
-#if(!$flashMessagesUIXPDisplayed &amp;&amp; $xcontext.action == 'view')
-  #set ($flashMessagesUIXPDisplayed = 1)
+## Don't initialize twice if there is another flashmessages installation on this subwiki.
+## The global extension point is initialized first, so we need to check for local extension points for flash &lt;= 1.8.1.
+#set ($flasmessagesVersion =
+  $services.extension.installed.getInstalledExtension('com.xwiki.flashmessages:application-flashmessages-ui',
+  "wiki:$services.wiki.currentWikiId").getLocalExtension().getId().getVersion())
+#if ("$!flasmessagesVersion" != '')
+  #set ($flashmessagesAreLocal = $flasmessagesVersion.compareTo('1.8.1') &lt;= 0)
+#end
+#if(!$flashmessagesAreLocal &amp;&amp; !$flashMessagesUIXPInitialized &amp;&amp; $xcontext.action == 'view')
+  ## The subwiki to use as the source of the extension documents, css, jsx.
+  #set ($flashMessagesUIXPInitialized = 1)
   #set ($searchFlashInstallation = $collectiontool.getOrderedSet())
-  ## Custom configurations for the app will be applied from the local wiki, then main wiki, then any other place where the FlashMessages app is installed.
+  ## Custom configurations for the app will be applied from the local wiki, then main wiki,
+  ## then any other place where the FlashMessages app is installed.
   #set ($discard = $searchFlashInstallation.addAll([$doc.getWiki(), $services.wiki.getMainWikiId()]))
   #set ($discard = $searchFlashInstallation.addAll($services.wiki.getAllIds()))
   #set ($flashInstallSubwikis = [])
   #foreach ($subwiki in $searchFlashInstallation)
-    #if ($xwiki.exists("$subwiki:Flash.DisplayFlashMessages") &amp;&amp; $xwiki.hasAccessLevel('view', $xcontext.userReference, "$subwiki:Flash.DisplayFlashMessages"))
+    #if ($xwiki.exists("$subwiki:Flash.DisplayFlashMessages")
+        &amp;&amp; $xwiki.hasAccessLevel('view', $xcontext.userReference, "$subwiki:Flash.DisplayFlashMessages"))
       #set ($discard = $flashInstallSubwikis.add($subwiki))
     #end
   #end

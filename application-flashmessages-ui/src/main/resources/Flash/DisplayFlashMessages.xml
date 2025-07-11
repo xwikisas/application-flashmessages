@@ -138,7 +138,9 @@
             #set($document = $xwiki.getDocument($r.doc))
             #set($obj = $document.getObject('Flash.FlashClass'))
             &lt;li class="unit"&gt;
-              &lt;span class="subwiki"&gt;[[$document.getWiki()&gt;&gt;$!services.wiki.getById($document.getWiki()).getMainPageReference()]]&lt;/span&gt;
+              #if ($hasAdmin)
+                &lt;span class="subwiki"&gt;[[$document.getWiki()&gt;&gt;$!services.wiki.getById($document.getWiki()).getMainPageReference()]]&lt;/span&gt;&amp;nbsp;
+              #end
               &lt;span class="date"&gt;$!services.rendering.escape($!obj.display('dateBegin', 'view'), 'xwiki/2.1') : &lt;/span&gt;
               &lt;span class="message"&gt;$!services.rendering.escape($!obj.display('message', 'view'), 'xwiki/2.1')&lt;/span&gt;
             &lt;/li&gt;
@@ -154,6 +156,7 @@
 ##            DISPLAY ALERT
 ###############################################
 #set($userDoc = $xwiki.getDocument($xcontext.user))
+#set ($userLocalString = services.model.serialize($userDoc, 'local'))
 #set($userValObj = $userDoc.getObject('Flash.FlashValidationClass'))
 #set($userValList = $userValObj.getProperty('flash').getValue())
 #set($need = [])
@@ -165,8 +168,14 @@
   #set ($seenDate = $msgValObj.getValue('seenDate'))
   #set ($wasSeenToday = $datetool.format($dateFormat, $dateNow) == $datetool.format($dateFormat, $seenDate))
   #set ($doRepeatEntry = $msgDoc.getObject('Flash.FlashClass').getValue('repeat') == 1)
+  ## If viewed from one subwiki and the message is from another subwiki, user references are serialized differently.
+  #if ($msgDoc.getWiki() == $userDoc.getWiki())
+    #set ($userStr = $userLocalString)
+  #else
+    #set ($userStr = $xcontext.user)
+  #end
   ## Check if the message was already seen by this user or if it wasn't seen today, for entries with repeat selected.
-  #if ((!$userValList.contains($msg.doc) &amp;&amp; !$msgValList.contains($xcontext.user))
+  #if ((!$userValList.contains($msg.doc) &amp;&amp; !$msgValList.contains($userStr))
       || (!$wasSeenToday &amp;&amp; $doRepeatEntry))
     #set ($discard = $need.add($msg.doc))
   #end
@@ -192,11 +201,14 @@
     }
   #end
     ];
-    // This is a workaround for https://jira.xwiki.org/browse/XWIKI-20623 : JS function XWiki.Document#getURL does not take into account the wiki name
-    fetch('/xwiki/rest/wikis').then(res =&gt; res.json())
+    // This is a workaround for XWIKI-20623 : JS function XWiki.Document#getURL does not take into account the wiki name
+    fetch('/xwiki/rest/wikis').then(res =&gt; res.text())
     .then(data =&gt; {
-      let flashNotifierUrl = '/xwiki/__subwiki__/jsx/Flash/FlashNotifier?r=1';
-      flashNotifierUrl = flashNotifierUrl.replace('__subwiki__', data.wikis.size() &gt; 1 ? 'wiki/$flashInstallSubwiki' : 'bin');
+      data = (new DOMParser()).parseFromString(data, "text/xml");
+      let wikis = Array.from(data.activeElement.getElementsByTagName('id')).map(a =&gt; a.innerHTML);
+      let flashNotifierUrl = '/xwiki/__subwiki__/jsx/Flash/FlashNotifier';
+      flashNotifierUrl = flashNotifierUrl.replace('__subwiki__', wikis.length &gt; 1 ? 'wiki/$flashInstallSubwiki' : 'bin');
+      // End workaround.
       require.config({
         'paths': {
            'flashNotifier': flashNotifierUrl
@@ -224,8 +236,12 @@
         &lt;div&gt;&lt;/div&gt;
       &lt;/div&gt;
       &lt;div class="modal-footer"&gt;
+        ## Workaround for the translation not working on subwikis without flashmessages installed.
+        #set ($temp = $xcontext.wiki)
+        #set ($xcontext.wiki = $flashInstallSubwiki)
         &lt;input type="button" class="btn btn-primary" disabled="disabled"
           value="$escapetool.xml($services.localization.render('flash.flashmessages.confirm'))"/&gt;
+        #set ($xcontext.wiki = $temp)
       &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
