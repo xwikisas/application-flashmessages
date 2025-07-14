@@ -62,6 +62,19 @@
   ## Local users are normally included only in local groups (from the same wiki).
   #set ($groups = $services.user.group.getGroupsFromMemberWiki($xcontext.userReference))
 #end
+#set ($groupsFilter = [])
+#foreach ($groupReference in $groups)
+  ## Remove the wiki component from the group reference if it matches the wiki of the message.
+  #set ($compactGroupReferenceLocal = $services.model.serialize($groupReference, 'local'))
+  #set ($compactGroupReferenceFull  = $services.model.serialize($groupReference, 'default').replace(':','\:'))
+  #set ($messageWiki = $groupReference.getWikiReference().getName())
+  #set ($discard = $groupsFilter.add("(wiki:$messageWiki AND property.Flash.FlashClass.groups:*$compactGroupReferenceLocal(,|\r)*) OR (-wiki:$messageWiki AND property.Flash.FlashClass.groups:*$compactGroupReferenceFull(,|\r)*)"))
+#end
+#if ($groupsFilter.size() &gt; 0)
+  #set ($groupsFilter = " AND ($stringtool.join($groupsFilter, ' OR ')) ")
+#else
+  #set ($groupsFilter = '')
+#end
 ##
 ###############################################
 ##            DISPLAY MESSAGES
@@ -71,58 +84,32 @@
 ## If the user is not in any group then no message should be displayed
 #if($groups.size() &gt; 0)
   #set($events = [])
-  ## Go through all subwikis which have the FlashMessages app installed.
-  #foreach ($currentWiki in $flashInstallSubwikis)
-    #set ($groupsFilter = [])
-    #foreach ($groupReference in $groups)
-      ## Remove the wiki component from the group reference if it matches the current wiki (where we look for flash
-      ## messages) because that's what we save in the groups property of flash messages.
-      #if ("$groupReference.getWikiReference().getName()" == $currentWiki)
-        #set ($compactGroupReference = $services.model.serialize($groupReference, 'local'))
+  #set ($query = $services.query.createQuery("object:Flash.FlashClass AND property.Flash.FlashClass.dateBegin:[* TO NOW] AND -property.Flash.FlashClass.dateEnd:[* TO NOW] AND property.Flash.FlashClass.subwikis:*${doc.getWiki()}(,|\r)* $groupsFilter", 'solr').bindValue('fq', 'type:DOCUMENT AND -fullname:Flash.FlashTemplate'))
+  #set ($queryResults = $query.setLimit(20).execute().get(0).getResults())
+  ##
+  #foreach($event in $queryResults)
+    #set ($eventDocName    = "$event.wiki:$event.fullname")
+    ## If solr isn't up to date, don't include deleted flashmessages.
+    #if ($xwiki.exists($eventDocName))
+      #set ($dateBegin       = $event.get('property.Flash.FlashClass.dateBegin_sortDate'))
+      #set ($repeat          = $event.get('property.Flash.FlashClass.repeat_string')[0])
+      #set ($repeatInterval  = $event.get('property.Flash.FlashClass.repeatInterval_string')[0])
+      #set ($repeatFrequency = $numbertool.integer($event.get('property.Flash.FlashClass.repeatFrequency_string')[0]))
+      #set ($repeatDays      = $event.get('property.Flash.FlashClass.repeatDays_string'))
+      ##
+      #set ($today           = $datetool)
+      #set ($dayOfTheWeek    = $stringtool.lowerCase($datetool.format('EEEE', $today)))
+      #set ($dateDiff        = $datetool.difference($dateBegin, $today))
+      #if ($repeat == 1)
+        #if (($repeatInterval == 'daily'   &amp;&amp; $mathtool.mod($dateDiff.days,   $repeatFrequency) == 0) ||
+            ($repeatInterval == 'weekly'  &amp;&amp; $mathtool.mod($dateDiff.weeks,  $repeatFrequency) == 0 &amp;&amp; $repeatDays.contains($dayOfTheWeek)) ||
+            ($repeatInterval == 'monthly' &amp;&amp; $mathtool.mod($dateDiff.months, $repeatFrequency) == 0 &amp;&amp; $datetool.format('d', $dateBegin) == $datetool.format('d', $today)) ||
+            ($repeatInterval == 'yearly'  &amp;&amp; $mathtool.mod($dateDiff.years,  $repeatFrequency) == 0 &amp;&amp; $datetool.format('Md', $dateBegin) == $datetool.format('Md', $today))
+          )
+          #set($discard = $events.add({'doc' : $eventDocName, 'date' : $dateBegin}))
+        #end
       #else
-        #set ($compactGroupReference = $services.model.serialize($groupReference, 'default'))
-      #end
-      #set ($discard = $groupsFilter.add("'$compactGroupReference' member of obj.groups"))
-    #end
-    #if ($groupsFilter.size() &gt; 0)
-      #set ($groupsFilter = " AND ($stringtool.join($groupsFilter, ' OR ')) ")
-    #else
-      #set ($groupsFilter = '')
-    #end
-    ##
-    #set ($baseQuery = "select doc.fullName, obj.dateBegin {0}, obj.subwikis from Document doc, doc.object(Flash.FlashClass) as obj WHERE doc.fullName &lt;&gt; 'Flash.FlashTemplate' $!groupsFilter AND obj.dateBegin &lt;= :now AND (obj.dateEnd is null OR obj.dateEnd &gt; :now) {1} ORDER BY obj.dateBegin DESC")
-    #set ($nonRecurringQuery = $baseQuery.replace("{0}", "").replace("{1}", "AND (obj.repeat is null OR obj.repeat = 0)"))
-    #set ($nonRecurring = $services.query.xwql($nonRecurringQuery).bindValue('now', $dateNow).setLimit(3).setWiki($currentWiki).execute())
-    ##
-    #set ($recurringQuery = $baseQuery.replace("{0}", ", obj.repeatInterval, obj.repeatFrequency, obj.repeatDays ").replace("{1}", "AND obj.repeat = 1"))
-    #set ($recurring = $services.query.xwql($recurringQuery).bindValue('now', $dateNow).setWiki($currentWiki).execute())
-    ##
-    #foreach($event in $nonRecurring)
-      #set ($subwikis = $stringtool.split($event[2], '|'))
-      #if ($subwikis.contains($doc.getWiki()))
-        #set($discard = $events.add({'doc' : "$currentWiki:$event[0]", 'date' : $event[1]}))
-      #end
-    #end
-    ##
-    #foreach($event in $recurring)
-      #set($document        = $event[0])
-      #set($date            = $event[1])
-      #set($repeatInterval  = $event[2])
-      #set($repeatFrequency = $numbertool.integer($event[3]))
-      #set($repeatDays      = $stringtool.split($event[4], '|'))
-      #set ($subwikis       = $stringtool.split($event[5], '|'))
-      ##
-      #set($today           = $datetool)
-      #set($dayOfTheWeek    = $stringtool.lowerCase($datetool.format('EEEE', $today)))
-      #set($dateDiff        = $datetool.difference($date, $today))
-      ##
-      #if($subwikis.contains($doc.getWiki()) &amp;&amp; (
-        ($repeatInterval == 'daily'   &amp;&amp; $mathtool.mod($dateDiff.days,   $repeatFrequency) == 0) ||
-        ($repeatInterval == 'weekly'  &amp;&amp; $mathtool.mod($dateDiff.weeks,  $repeatFrequency) == 0 &amp;&amp; $repeatDays.contains($dayOfTheWeek)) ||
-        ($repeatInterval == 'monthly' &amp;&amp; $mathtool.mod($dateDiff.months, $repeatFrequency) == 0 &amp;&amp; $datetool.format('d', $date) == $datetool.format('d', $today)) ||
-        ($repeatInterval == 'yearly'  &amp;&amp; $mathtool.mod($dateDiff.years,  $repeatFrequency) == 0 &amp;&amp; $datetool.format('Md', $date) == $datetool.format('Md', $today))
-      ))
-        #set($discard = $events.add({'doc' : "$currentWiki:$document", 'date' : $date}))
+        #set($discard = $events.add({'doc' : $eventDocName, 'date' : $dateBegin}))
       #end
     #end
   #end
