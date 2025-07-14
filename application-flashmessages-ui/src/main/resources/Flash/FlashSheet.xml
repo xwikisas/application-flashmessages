@@ -44,8 +44,13 @@
   #set($obj = $doc.getObject('Flash.FlashClass'))
   #set($discard = $doc.use('Flash.FlashClass'))
   #if ($obj.getProperty('subwikis').value.size() == 0)
-    {{warning}}$services.localization.render('flash.banner.subwikis.none'){{/warning}}
+    #if ($xcontext.action == 'edit' &amp;&amp; !$xwiki.exists($doc))
+      ## By default, newly created messages should be displayed on the current wiki.
+      #set ($discard = $obj.set('subwikis', $doc.getWiki()))
+    #else
+      {{warning}}$services.localization.render('flash.banner.subwikis.none'){{/warning}}
 
+    #end
   #end
   ## We don't have access to the form element to set the CSS class for the vertical form layout standard.
   #if("$!xcontext.action" == 'edit')
@@ -77,6 +82,10 @@
     (((
       (% class="col-sm-6" %)
       (((
+        #displayFlashProperty($obj 'groups')
+      )))
+      (% class="col-sm-6" %)
+      (((
         #displayFlashProperty($obj 'subwikis')
       )))
     )))
@@ -94,10 +103,6 @@
           #else
             $doc.display('repeat')
           #end
-      )))
-      (% class="col-sm-6" %)
-      (((
-        #displayFlashProperty($obj 'groups')
       )))
     )))
     (% class="repeatSettings $!hideRepeatSettings" %)
