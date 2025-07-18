@@ -255,6 +255,7 @@
     #end
     #set ($parameters = {
       'name': "${object.getxWikiClass().name}_${object.number}_${name}",
+      'id': "${object.getxWikiClass().name}_${object.number}_${name}",
       'value': $value,
       'multiple': 'multiple',
       'prefix': ' ',
