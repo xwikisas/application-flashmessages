@@ -92,7 +92,7 @@
     ## If solr isn't up to date, don't include deleted flashmessages.
     #if ($xwiki.exists($eventDocName))
       #set ($dateBegin       = $event.get('property.Flash.FlashClass.dateBegin_sortDate'))
-      #set ($repeat          = $event.get('property.Flash.FlashClass.repeat_string')[0])
+      #set ($repeat          = $event.get('property.Flash.FlashClass.repeat_boolean')[0])
       #set ($repeatInterval  = $event.get('property.Flash.FlashClass.repeatInterval_string')[0])
       #set ($repeatFrequency = $numbertool.integer($event.get('property.Flash.FlashClass.repeatFrequency_string')[0]))
       #set ($repeatDays      = $event.get('property.Flash.FlashClass.repeatDays_string'))
@@ -100,7 +100,7 @@
       #set ($today           = $datetool)
       #set ($dayOfTheWeek    = $stringtool.lowerCase($datetool.format('EEEE', $today)))
       #set ($dateDiff        = $datetool.difference($dateBegin, $today))
-      #if ($repeat == 1)
+      #if ($repeat == true)
         #if (($repeatInterval == 'daily'   &amp;&amp; $mathtool.mod($dateDiff.days,   $repeatFrequency) == 0) ||
             ($repeatInterval == 'weekly'  &amp;&amp; $mathtool.mod($dateDiff.weeks,  $repeatFrequency) == 0 &amp;&amp; $repeatDays.contains($dayOfTheWeek)) ||
             ($repeatInterval == 'monthly' &amp;&amp; $mathtool.mod($dateDiff.months, $repeatFrequency) == 0 &amp;&amp; $datetool.format('d', $dateBegin) == $datetool.format('d', $today)) ||
@@ -126,7 +126,7 @@
             #set($obj = $document.getObject('Flash.FlashClass'))
             &lt;li class="unit"&gt;
               #if ($hasAdmin)
-                &lt;span class="subwiki"&gt;[[$document.getWiki()&gt;&gt;$!services.wiki.getById($document.getWiki()).getMainPageReference()]]&lt;/span&gt;&amp;nbsp;
+                &lt;span class="subwiki"&gt;[[$!services.rendering.escape($escapetool.xml($services.wiki.getById($document.getWiki()).getPrettyName()), 'xwiki/2.1')&gt;&gt;$!services.wiki.getById($document.getWiki()).getMainPageReference()]]&lt;/span&gt;&amp;nbsp;
               #end
               &lt;span class="date"&gt;$!services.rendering.escape($!obj.display('dateBegin', 'view'), 'xwiki/2.1') : &lt;/span&gt;
               &lt;span class="message"&gt;$!services.rendering.escape($!obj.display('message', 'view'), 'xwiki/2.1')&lt;/span&gt;

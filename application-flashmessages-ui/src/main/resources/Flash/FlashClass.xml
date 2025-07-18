@@ -260,7 +260,7 @@
 {{/html}}
 #elseif ($type == 'view')
   #foreach ($subwiki in $value)
-    #set ($subwiki = $services.wiki.getById($subwiki))##
+    #set ($subwiki = $services.wiki.getById($subwiki))
 [[$services.rendering.escape($services.rendering.escape($subwiki.getPrettyName(), 'xwiki/2.1'), 'xwiki/2.1')&gt;&gt;$services.rendering.escape($subwiki.getMainPageReference(), 'xwiki/2.1')]] ##
   #end
 #end

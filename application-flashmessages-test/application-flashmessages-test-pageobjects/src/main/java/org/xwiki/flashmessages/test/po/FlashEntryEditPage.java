@@ -76,6 +76,9 @@ public class FlashEntryEditPage extends FlashPage
     @FindBy(id = "Flash.FlashClass_0_groups")
     protected WebElement groupsElement;
 
+    @FindBy(id = "Flash.FlashClass_0_subwikis")
+    protected WebElement subwikisElement;
+
     @FindBy(id = "Flash.FlashClass_0_message")
     protected WebElement messageElement;
 
@@ -304,6 +307,21 @@ public class FlashEntryEditPage extends FlashPage
             groupSuggest.sendKeys(group).waitForSuggestions().selectByVisibleText(group);
         }
         groupSuggest.hideSuggestions();
+    }
+
+    /**
+     * Set the subwikis the subwikis towards the message is aimed to
+     *
+     * @param subwikis the list of subwikis for which the flashmessage is displayed
+     */
+    public void setSubwikis(List<String> subwikis)
+    {
+        SuggestInputElement subwikisSuggest = new SuggestInputElement(this.subwikisElement);
+        subwikisSuggest.clearSelectedSuggestions();
+        for (String subwiki : subwikis) {
+            subwikisSuggest.selectByValue(subwiki);
+        }
+        subwikisSuggest.hideSuggestions();
     }
 
     /**

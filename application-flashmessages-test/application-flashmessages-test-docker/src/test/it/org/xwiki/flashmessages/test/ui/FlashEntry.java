@@ -46,6 +46,8 @@ public class FlashEntry
 
     private ArrayList<String> groups;
 
+    private ArrayList<String> subwikis;
+
     private String message;
 
     /**
@@ -59,10 +61,12 @@ public class FlashEntry
      * @param repeatFrequency the repeat frequency
      * @param repeatDays the repeat days
      * @param groups the xwiki groups
+     * @param subwikis the subwikis the message will appear in
      * @param message the display message
      */
     public FlashEntry(String name, Calendar dateBegin, Calendar dateEnd, Boolean repeat, String repeatInterval,
-        int repeatFrequency, ArrayList<String> repeatDays, ArrayList<String> groups, String message)
+        int repeatFrequency, ArrayList<String> repeatDays, ArrayList<String> groups, ArrayList<String> subwikis,
+        String message)
     {
         this.name = name;
         this.dateBegin = dateBegin;
@@ -72,6 +76,7 @@ public class FlashEntry
         this.repeatFrequency = repeatFrequency;
         this.repeatDays = repeatDays;
         this.groups = groups;
+        this.subwikis = subwikis;
         this.message = message;
     }
 
@@ -233,6 +238,26 @@ public class FlashEntry
     public void setGroups(ArrayList<String> groups)
     {
         this.groups = groups;
+    }
+
+    /**
+     * Get subwikis
+     *
+     * @return the list of subwikis towards the entry is aimed
+     */
+    public ArrayList<String> getSubwikis()
+    {
+        return subwikis;
+    }
+
+    /**
+     * Set subwikis
+     *
+     * @param subwikis the list of subwikis towards the entry is aimed
+     */
+    public void setSubwikis(ArrayList<String> subwikis)
+    {
+        this.subwikis = subwikis;
     }
 
     /**
