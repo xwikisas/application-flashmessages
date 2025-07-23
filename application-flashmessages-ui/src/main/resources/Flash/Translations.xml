@@ -52,6 +52,7 @@ flash.livetable.dateEnd=End date
 flash.livetable.groups=Groups
 flash.livetable.message=Message
 flash.livetable.doc.date=Update date
+flash.livetable.subwikis=Subwikis
 flash.livetable._actions.edit=Edit
 flash.livetable._actions.delete=Delete
 flash.livetable._actions=Actions
@@ -78,7 +79,8 @@ Flash.FlashClass_repeatDays_sunday=Sunday
 Flash.FlashClass_message=Message
 Flash.FlashClass_groups=Groups
 Flash.FlashClass_subwikis=Subwikis
-flash.subwikis.empty=None
+Flash.FlashClass_subwikis_current=Current Wiki
+Flash.FlashClass_subwikis_all=All subwikis
 
 ## Sheet ##
 flash.repeat.summary=Repeat summary
@@ -89,7 +91,6 @@ flash.repeat.summary.daily=days
 flash.repeat.summary.weekly=weeks
 flash.repeat.summary.monthly=months
 flash.repeat.summary.yearly=years
-flash.banner.subwikis.none=This flash message has no subwikis set, so it won't be displayed.
 
 ## Template Provider ##
 templateProvider.flashmessages.name=Flash Messages

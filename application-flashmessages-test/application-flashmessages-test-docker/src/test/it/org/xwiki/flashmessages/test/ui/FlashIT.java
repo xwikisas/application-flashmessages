@@ -130,7 +130,7 @@ class FlashIT
                 2,
                 new ArrayList<String>(Arrays.asList(flashUtil.getCurrentDayOfTheWeek())),
                 new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-                new ArrayList<String>(Arrays.asList("xwiki")),
+                "current",
                 "Hi! It is like hello, only shorter.");
             flashUtil.setDefaultEntry(defaultEntry);
         }
@@ -389,7 +389,7 @@ class FlashIT
             1,
             new ArrayList<String>(),
             new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "Daily");
 
         // Create test message and close the 1st time pop-up
@@ -414,7 +414,7 @@ class FlashIT
             1,
             new ArrayList<String>(),
             new ArrayList<String>(Arrays.asList("XWikiAdminGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "NonRecurringActiveMessage");
 
         flashUtil.testMessage(entry, true);
@@ -431,7 +431,7 @@ class FlashIT
             1,
             new ArrayList<String>(),
             new ArrayList<String>(Arrays.asList("XWikiAdminGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "NonRecurringInactiveMessage");
 
         flashUtil.testMessage(entry, false);
@@ -448,7 +448,7 @@ class FlashIT
             2,
             new ArrayList<String>(),
             new ArrayList<String>(Arrays.asList("XWikiAdminGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "Every 2 days");
 
         flashUtil.testMessage(entry, true);
@@ -465,7 +465,7 @@ class FlashIT
             5,
             new ArrayList<String>(),
             new ArrayList<String>(Arrays.asList("XWikiAdminGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "Every 3 days");
 
         flashUtil.testMessage(entry, false);
@@ -482,7 +482,7 @@ class FlashIT
             2,
             new ArrayList<String>(Arrays.asList(flashUtil.getCurrentDayOfTheWeek())),
             new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "Every 2 weeks");
 
         flashUtil.testMessage(entry, true);
@@ -499,7 +499,7 @@ class FlashIT
             2,
             new ArrayList<String>(Arrays.asList(flashUtil.getCurrentDayOfTheWeek() == "monday" ? "tuesday" : "monday")),
             new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "Every 2 weeks");
 
         flashUtil.testMessage(entry, false);
@@ -516,7 +516,7 @@ class FlashIT
             6,
             new ArrayList<String>(),
             new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "Every 6 months");
 
         flashUtil.testMessage(entry, true);
@@ -533,7 +533,7 @@ class FlashIT
             9,
             new ArrayList<String>(),
             new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "Every 9 months");
 
         flashUtil.testMessage(entry, false);
@@ -550,7 +550,7 @@ class FlashIT
             2,
             new ArrayList<String>(),
             new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "Every 2 years today");
 
         flashUtil.testMessage(entry, true);
@@ -567,7 +567,7 @@ class FlashIT
             3,
             new ArrayList<String>(),
             new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            new ArrayList<String>(Arrays.asList("xwiki")),
+            "current",
             "Every 3 years today");
 
         flashUtil.testMessage(entry, false);

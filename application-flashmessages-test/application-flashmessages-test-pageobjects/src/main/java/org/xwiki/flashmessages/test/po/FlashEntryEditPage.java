@@ -314,14 +314,10 @@ public class FlashEntryEditPage extends FlashPage
      *
      * @param subwikis the list of subwikis for which the flashmessage is displayed
      */
-    public void setSubwikis(List<String> subwikis)
+    public void setSubwikis(String subwikis)
     {
-        SuggestInputElement subwikisSuggest = new SuggestInputElement(this.subwikisElement);
-        subwikisSuggest.clearSelectedSuggestions();
-        for (String subwiki : subwikis) {
-            subwikisSuggest.selectByValue(subwiki);
-        }
-        subwikisSuggest.hideSuggestions();
+        Select subwikisSelect = new Select(subwikisElement);
+        subwikisSelect.selectByValue(subwikis);
     }
 
     /**

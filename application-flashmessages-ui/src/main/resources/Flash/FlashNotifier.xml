@@ -421,14 +421,7 @@
     <property>
       <content>{{velocity}}
 ## Don't initialize twice if there is another flashmessages installation on this subwiki.
-## The global extension point is initialized first, so we need to check for local extension points for flash &lt;= 1.8.1.
-#set ($flasmessagesVersion =
-  $services.extension.installed.getInstalledExtension('com.xwiki.flashmessages:application-flashmessages-ui',
-  "wiki:$services.wiki.currentWikiId").getLocalExtension().getId().getVersion())
-#if ("$!flasmessagesVersion" != '')
-  #set ($flashmessagesAreLocal = $flasmessagesVersion.compareTo('1.8.1') &lt;= 0)
-#end
-#if(!$flashmessagesAreLocal &amp;&amp; !$flashMessagesUIXPInitialized &amp;&amp; $xcontext.action == 'view')
+#if (!$flashMessagesUIXPInitialized &amp;&amp; $xcontext.action == 'view')
   ## The subwiki to use as the source of the extension documents, css, jsx.
   #set ($flashMessagesUIXPInitialized = 1)
   #set ($searchFlashInstallation = $collectiontool.getOrderedSet())
