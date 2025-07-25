@@ -207,7 +207,7 @@ public class FlashUtil
         }
 
         entryEditPage.setGroups(entry.getGroups());
-        entryEditPage.setSubwikis(entry.getSubwikis());
+        entryEditPage.setWikiScope(entry.getWikiScope());
         entryEditPage.setMessage(entry.getMessage());
 
         return entryEditPage.clickSaveAndView();

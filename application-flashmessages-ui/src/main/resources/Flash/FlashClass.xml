@@ -236,20 +236,20 @@
       <values>daily|weekly|monthly|yearly</values>
       <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
     </repeatInterval>
-    <subwikis>
+    <wikiScope>
       <cache>0</cache>
       <customDisplay/>
-      <defaultValue>current</defaultValue>
+      <defaultValue>currentWiki</defaultValue>
       <disabled>0</disabled>
       <displayType>select</displayType>
       <freeText/>
       <hint/>
       <largeStorage>0</largeStorage>
       <multiSelect>0</multiSelect>
-      <name>subwikis</name>
+      <name>wikiScope</name>
       <number>9</number>
       <picker>1</picker>
-      <prettyName>Subwikis</prettyName>
+      <prettyName/>
       <relationalStorage>0</relationalStorage>
       <separator> </separator>
       <separators>|, </separators>
@@ -258,9 +258,9 @@
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
       <validationRegExp/>
-      <values>current|all</values>
+      <values>currentWiki|allWikis</values>
       <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-    </subwikis>
+    </wikiScope>
   </class>
   <object>
     <name>Flash.FlashClass</name>

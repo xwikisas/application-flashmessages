@@ -46,7 +46,7 @@ public class FlashEntry
 
     private ArrayList<String> groups;
 
-    private String subwikis;
+    private String wikiScope;
 
     private String message;
 
@@ -61,11 +61,11 @@ public class FlashEntry
      * @param repeatFrequency the repeat frequency
      * @param repeatDays the repeat days
      * @param groups the xwiki groups
-     * @param subwikis the subwikis the message will appear in
+     * @param wikiScope the wiki scope where the message should be visible (currentWiki|allWikis)
      * @param message the display message
      */
     public FlashEntry(String name, Calendar dateBegin, Calendar dateEnd, Boolean repeat, String repeatInterval,
-        int repeatFrequency, ArrayList<String> repeatDays, ArrayList<String> groups, String subwikis,
+        int repeatFrequency, ArrayList<String> repeatDays, ArrayList<String> groups, String wikiScope,
         String message)
     {
         this.name = name;
@@ -76,7 +76,7 @@ public class FlashEntry
         this.repeatFrequency = repeatFrequency;
         this.repeatDays = repeatDays;
         this.groups = groups;
-        this.subwikis = subwikis;
+        this.wikiScope = wikiScope;
         this.message = message;
     }
 
@@ -241,23 +241,23 @@ public class FlashEntry
     }
 
     /**
-     * Get subwikis
+     * Get wikiScope
      *
-     * @return the list of subwikis towards the entry is aimed
+     * @return the wiki scope where the message should be visible (currentWiki|allWikis)
      */
-    public String getSubwikis()
+    public String getWikiScope()
     {
-        return subwikis;
+        return wikiScope;
     }
 
     /**
-     * Set subwikis
+     * Set wikiScope
      *
-     * @param subwikis the list of subwikis towards the entry is aimed
+     * @param wikiScope the wiki scope where the message should be visible (currentWiki|allWikis)
      */
-    public void setSubwikis(String subwikis)
+    public void setWikiScope(String wikiScope)
     {
-        this.subwikis = subwikis;
+        this.wikiScope = wikiScope;
     }
 
     /**

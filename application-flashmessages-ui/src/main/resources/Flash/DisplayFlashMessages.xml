@@ -65,10 +65,12 @@
 #set ($groupsFilter = [])
 #foreach ($groupReference in $groups)
   ## Remove the wiki component from the group reference if it matches the wiki of the message.
-  #set ($compactGroupReferenceLocal = $services.model.serialize($groupReference, 'local'))
-  #set ($compactGroupReferenceFull  = $services.model.serialize($groupReference, 'default').replace(':','\:'))
+  #set ($groupReferenceCompact = $services.model.serialize($groupReference, 'local'))
+  #set ($groupReferenceFull  = $services.model.serialize($groupReference, 'default').replace(':','\:'))
   #set ($messageWiki = $groupReference.getWikiReference().getName())
-  #set ($discard = $groupsFilter.add("(wiki:$messageWiki AND property.Flash.FlashClass.groups:*(?&lt;!\:)$compactGroupReferenceLocal(,|\r)*) OR (-wiki:$messageWiki AND property.Flash.FlashClass.groups:*$compactGroupReferenceFull(,|\r)*)"))
+  #set ($discard = $groupsFilter.add(
+    "(wiki:$messageWiki AND property.Flash.FlashClass.groups:*(?&lt;!\:)$groupReferenceCompact(,|\r)*)
+    OR (-wiki:$messageWiki AND property.Flash.FlashClass.groups:*$groupReferenceFull(,|\r)*)"))
 #end
 #if ($groupsFilter.size() &gt; 0)
   #set ($groupsFilter = " AND ($stringtool.join($groupsFilter, ' OR ')) ")
@@ -84,7 +86,11 @@
 ## If the user is not in any group then no message should be displayed
 #if($groups.size() &gt; 0)
   #set($events = [])
-  #set ($query = $services.query.createQuery("object:Flash.FlashClass AND property.Flash.FlashClass.dateBegin:[* TO NOW] AND -property.Flash.FlashClass.dateEnd:[* TO NOW] AND (wiki:$doc.getWiki() OR property.Flash.FlashClass.subwikis:all) $groupsFilter", 'solr').bindValue('fq', 'type:DOCUMENT AND -fullname:Flash.FlashTemplate'))
+  #set ($query = $services.query.createQuery(
+    "object:Flash.FlashClass AND property.Flash.FlashClass.dateBegin:[* TO NOW]
+    AND -property.Flash.FlashClass.dateEnd:[* TO NOW]
+    AND (wiki:$doc.getWiki() OR property.Flash.FlashClass.wikiScope:allWikis)
+    $groupsFilter", 'solr').bindValue('fq', 'type:DOCUMENT AND -fullname:Flash.FlashTemplate'))
   #set ($queryResults = $query.setLimit(20).execute().get(0).getResults())
   ##
   #foreach($event in $queryResults)

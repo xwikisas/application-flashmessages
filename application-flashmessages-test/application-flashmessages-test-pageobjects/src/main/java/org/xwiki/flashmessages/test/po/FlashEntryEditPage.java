@@ -76,8 +76,8 @@ public class FlashEntryEditPage extends FlashPage
     @FindBy(id = "Flash.FlashClass_0_groups")
     protected WebElement groupsElement;
 
-    @FindBy(id = "Flash.FlashClass_0_subwikis")
-    protected WebElement subwikisElement;
+    @FindBy(id = "Flash.FlashClass_0_wikiScope")
+    protected WebElement wikiScopeElement;
 
     @FindBy(id = "Flash.FlashClass_0_message")
     protected WebElement messageElement;
@@ -310,14 +310,14 @@ public class FlashEntryEditPage extends FlashPage
     }
 
     /**
-     * Set the subwikis the subwikis towards the message is aimed to
+     * Set the wiki scope the message should be displayed in.
      *
-     * @param subwikis the list of subwikis for which the flashmessage is displayed
+     * @param wikiScope "currentWiki" or "allWikis"
      */
-    public void setSubwikis(String subwikis)
+    public void setWikiScope(String wikiScope)
     {
-        Select subwikisSelect = new Select(subwikisElement);
-        subwikisSelect.selectByValue(subwikis);
+        Select wikiScopeSelect = new Select(wikiScopeElement);
+        wikiScopeSelect.selectByValue(wikiScope);
     }
 
     /**

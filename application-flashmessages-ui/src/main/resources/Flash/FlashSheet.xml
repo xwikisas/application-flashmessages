@@ -77,7 +77,7 @@
       )))
       (% class="col-sm-6" %)
       (((
-        #displayFlashProperty($obj 'subwikis')
+        #displayFlashProperty($obj 'wikiScope')
       )))
     )))
     (% class="row" %)
