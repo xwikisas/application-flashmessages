@@ -62,6 +62,12 @@
       <version>${platform.version}</version>
       <type>xar</type>
     </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-search-solr-test-utils</artifactId>
+      <version>${platform.version}</version>
+      <scope>test</scope>
+    </dependency>
 
     <!--When the licensing app has 14.10 as parent remove the content below -->
     <dependency>
