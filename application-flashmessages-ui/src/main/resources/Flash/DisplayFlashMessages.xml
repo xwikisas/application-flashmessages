@@ -64,8 +64,18 @@
 #end
 #set ($groupsFilter = [])
 #foreach ($groupReference in $groups)
-  ## Expand the group reference string to contain the subwiki too (subwiki:XWiki.Group).
-  #set ($discard = $groupsFilter.add($services.model.serialize($groupReference, 'default')))
+  ## Remove the wiki component from the group reference if it matches the wiki of the message.
+  #set ($groupReferenceCompact = $services.model.serialize($groupReference, 'local'))
+  #set ($groupReferenceFull  = $services.model.serialize($groupReference, 'default'))
+  #set ($messageWiki = $groupReference.getWikiReference().getName())
+  #set ($discard = $groupsFilter.add(
+    "(wiki:$messageWiki AND property.Flash.FlashClass.groups_string:""$groupReferenceCompact"")
+    OR (-wiki:$messageWiki AND property.Flash.FlashClass.groups_string:""$groupReferenceFull"")"))
+#end
+#if ($groupsFilter.size() &gt; 0)
+  #set ($groupsFilter = " AND ($stringtool.join($groupsFilter, ' OR ')) ")
+#else
+  #set ($groupsFilter = '')
 #end
 ##
 ###############################################
@@ -79,47 +89,33 @@
   #set ($query = $services.query.createQuery(
     "object:Flash.FlashClass AND property.Flash.FlashClass.dateBegin:[* TO NOW]
     AND -property.Flash.FlashClass.dateEnd:[* TO NOW]
-    AND (wiki:$doc.getWiki() OR property.Flash.FlashClass.wikiScope:allWikis)", 'solr').bindValue('fq', 'type:DOCUMENT AND -fullname:Flash.FlashTemplate'))
+    AND (wiki:$doc.getWiki() OR property.Flash.FlashClass.wikiScope:allWikis)
+    ", 'solr').bindValue('fq', "type:DOCUMENT AND -fullname:Flash.FlashTemplate $groupsFilter)"))
   #set ($queryResults = $query.setLimit(300).execute().get(0).getResults())
   ##
   #foreach($event in $queryResults)
     #set ($eventDocName    = "$event.wiki:$event.fullname")
     ## If solr isn't up to date, don't include deleted flashmessages.
     #if ($xwiki.exists($eventDocName))
-      ## First, see if the flashmessage should be displayed to the current user.
-      #set ($messageGroups = $event.get('property.Flash.FlashClass.groups_string'))
-      #set ($isAddressedToCurrentUserGroups = false)
-      #foreach ($messageGroup in $messageGroups)
-        #if (!$messageGroup.contains(':'))
-          ## Ensure all groups in the flashmessage property include the subwiki name.
-          #set($messageGroup = "$event.wiki:$messageGroup")
-        #end
-        #if ($groupsFilter.contains($messageGroup))
-          #set ($isAddressedToCurrentUserGroups = true)
-          #break
-        #end
-      #end
-      #if ($isAddressedToCurrentUserGroups)
-        #set ($dateBegin       = $event.get('property.Flash.FlashClass.dateBegin_sortDate'))
-        #set ($repeat          = $event.get('property.Flash.FlashClass.repeat_boolean')[0])
-        #set ($repeatInterval  = $event.get('property.Flash.FlashClass.repeatInterval_string')[0])
-        #set ($repeatFrequency = $numbertool.integer($event.get('property.Flash.FlashClass.repeatFrequency_string')[0]))
-        #set ($repeatDays      = $event.get('property.Flash.FlashClass.repeatDays_string'))
-        ##
-        #set ($today           = $datetool)
-        #set ($dayOfTheWeek    = $stringtool.lowerCase($datetool.format('EEEE', $today)))
-        #set ($dateDiff        = $datetool.difference($dateBegin, $today))
-        #if ($repeat == true)
-          #if (($repeatInterval == 'daily'   &amp;&amp; $mathtool.mod($dateDiff.days,   $repeatFrequency) == 0) ||
-              ($repeatInterval == 'weekly'  &amp;&amp; $mathtool.mod($dateDiff.weeks,  $repeatFrequency) == 0 &amp;&amp; $repeatDays.contains($dayOfTheWeek)) ||
-              ($repeatInterval == 'monthly' &amp;&amp; $mathtool.mod($dateDiff.months, $repeatFrequency) == 0 &amp;&amp; $datetool.format('d', $dateBegin) == $datetool.format('d', $today)) ||
-              ($repeatInterval == 'yearly'  &amp;&amp; $mathtool.mod($dateDiff.years,  $repeatFrequency) == 0 &amp;&amp; $datetool.format('Md', $dateBegin) == $datetool.format('Md', $today))
-            )
-            #set($discard = $events.add({'doc' : $eventDocName, 'date' : $dateBegin}))
-          #end
-        #else
+      #set ($dateBegin       = $event.get('property.Flash.FlashClass.dateBegin_sortDate'))
+      #set ($repeat          = $event.get('property.Flash.FlashClass.repeat_boolean')[0])
+      #set ($repeatInterval  = $event.get('property.Flash.FlashClass.repeatInterval_string')[0])
+      #set ($repeatFrequency = $numbertool.integer($event.get('property.Flash.FlashClass.repeatFrequency_string')[0]))
+      #set ($repeatDays      = $event.get('property.Flash.FlashClass.repeatDays_string'))
+      ##
+      #set ($today           = $datetool)
+      #set ($dayOfTheWeek    = $stringtool.lowerCase($datetool.format('EEEE', $today)))
+      #set ($dateDiff        = $datetool.difference($dateBegin, $today))
+      #if ($repeat == true)
+        #if (($repeatInterval == 'daily'   &amp;&amp; $mathtool.mod($dateDiff.days,   $repeatFrequency) == 0) ||
+            ($repeatInterval == 'weekly'  &amp;&amp; $mathtool.mod($dateDiff.weeks,  $repeatFrequency) == 0 &amp;&amp; $repeatDays.contains($dayOfTheWeek)) ||
+            ($repeatInterval == 'monthly' &amp;&amp; $mathtool.mod($dateDiff.months, $repeatFrequency) == 0 &amp;&amp; $datetool.format('d', $dateBegin) == $datetool.format('d', $today)) ||
+            ($repeatInterval == 'yearly'  &amp;&amp; $mathtool.mod($dateDiff.years,  $repeatFrequency) == 0 &amp;&amp; $datetool.format('Md', $dateBegin) == $datetool.format('Md', $today))
+          )
           #set($discard = $events.add({'doc' : $eventDocName, 'date' : $dateBegin}))
         #end
+      #else
+        #set($discard = $events.add({'doc' : $eventDocName, 'date' : $dateBegin}))
       #end
     #end
   #end
