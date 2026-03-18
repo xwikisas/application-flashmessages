@@ -346,7 +346,7 @@
     }
 
     // Navigation bullets
-    $("#flashMessages .navigation a").click(function(e) {
+    $("#flashMessages .navigation a").on('click', function(e) {
       e.preventDefault();
 
       // Remove the selected class from the currently selected indicator

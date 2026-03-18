@@ -68,35 +68,6 @@
       <version>${platform.version}</version>
       <scope>test</scope>
     </dependency>
-
-    <!--When the licensing app has 14.10 as parent remove the content below -->
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-platform-model-api</artifactId>
-      <version>${platform.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.commons</groupId>
-      <artifactId>xwiki-commons-extension-api</artifactId>
-      <version>${commons.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.xwiki.licensing</groupId>
-      <artifactId>application-licensing-common-api</artifactId>
-      <version>${licensing.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk15on</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.rendering</groupId>
-      <artifactId>xwiki-rendering-macro-html</artifactId>
-      <version>${rendering.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-test-docker</artifactId>
@@ -104,10 +75,9 @@
     </dependency>
     <dependency>
       <groupId>org.xwiki.commons</groupId>
-      <artifactId>xwiki-commons-crypto-common</artifactId>
+      <artifactId>xwiki-commons-logging-api</artifactId>
       <version>${commons.version}</version>
     </dependency>
-    <!-- Remove until here -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>application-flashmessages-test-pageobjects</artifactId>
