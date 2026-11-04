@@ -90,7 +90,8 @@
             #set($interval  = $doc.getValue('repeatInterval'))
             #set($frequency = $doc.getValue('repeatFrequency'))
             #set($days      = $doc.getValue('repeatDays'))
-            #repeatSummary($date, $interval, $frequency, $days)
+            #set ($summary = "#repeatSummary($date, $interval, $frequency, $days)")
+            $!services.rendering.escape($escapetool.xml($summary), 'xwiki/2.1')
           #else
             $doc.display('repeat')
           #end

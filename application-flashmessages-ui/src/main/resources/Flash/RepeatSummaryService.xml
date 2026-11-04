@@ -44,7 +44,7 @@
   #set($frequency = $numbertool.toNumber($request.frequency))
   #set($days      = $stringtool.split($request.days, ','))
   ##
-  #repeatSummary($date, $interval, $frequency, $days)
+  $!services.rendering.escape("#repeatSummary($date, $interval, $frequency, $days)", 'xwiki/2.1')
 #else
   Invalid request
 #end
