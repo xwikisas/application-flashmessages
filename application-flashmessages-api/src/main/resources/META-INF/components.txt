@@ -1,0 +1,3 @@
+com.xwiki.flashmessages.internal.FlashMessagesManager
+com.xwiki.flashmessages.internal.rest.DefaultFlashMessageResource
+com.xwiki.flashmessages.script.FlashMessagesScriptService

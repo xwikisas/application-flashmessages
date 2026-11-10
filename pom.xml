@@ -37,6 +37,7 @@
     <licensing.version>1.33.1</licensing.version>
   </properties>
   <modules>
+    <module>application-flashmessages-api</module>
     <module>application-flashmessages-ui</module>
     <module>application-flashmessages-xip</module>
   </modules>

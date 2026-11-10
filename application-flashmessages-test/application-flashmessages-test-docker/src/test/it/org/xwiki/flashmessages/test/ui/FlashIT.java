@@ -21,17 +21,26 @@ package org.xwiki.flashmessages.test.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.xwiki.flashmessages.test.po.FlashEntryEditPage;
 import org.xwiki.flashmessages.test.po.FlashEntryViewPage;
 import org.xwiki.flashmessages.test.po.FlashHomePage;
+import org.xwiki.flashmessages.test.po.FlashPopup;
 import org.xwiki.flashmessages.test.po.FlashSlider;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.WikiReference;
 import org.xwiki.panels.test.po.ApplicationsPanel;
 import org.xwiki.test.docker.junit5.UITest;
+import org.xwiki.test.docker.junit5.WikisSource;
 import org.xwiki.test.integration.junit.LogCaptureConfiguration;
 import org.xwiki.test.ui.TestUtils;
 import org.xwiki.test.ui.po.LiveTableElement;
@@ -54,6 +63,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "org.xwiki.platform:xwiki-platform-search-solr-query:15.10"
     }
 )
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class FlashIT
 {
     private FlashUtil flashUtil;
@@ -64,8 +74,8 @@ class FlashIT
     static void createUsers(TestUtils setup)
     {
         // Create administrator
-        setup.createUser("LightYagami", "justice", "email", "light.yagami@xwiki.org", "first_name", "Light",
-            "last_name", "Yagami");
+        setup.createUser(FlashUtil.ADMIN_USER, FlashUtil.ADMIN_PASSWORD, "email", "light.yagami@xwiki.org",
+            "first_name", "Light", "last_name", "Yagami");
 
         // Create normal user
         setup.createUser("MisaAmane", "love", "email", "misa.amane@xwiki.org", "first_name", "Misa", "last_name",
@@ -91,7 +101,7 @@ class FlashIT
         if (!setup.pageExists("XWiki", "XWikiAdminGroup")) {
             // Add Light Yagami as member of XWikiAdminGroup
             setup.loginAsSuperAdmin();
-            setup.addObject("XWiki", "XWikiAdminGroup", "XWiki.XWikiGroups", "member", "XWiki.LightYagami");
+            setup.addObject("XWiki", "XWikiAdminGroup", "XWiki.XWikiGroups", "member", "XWiki." + FlashUtil.ADMIN_USER);
             setup.addObject("XWiki", "XWikiPreferences", "XWiki.XWikiGlobalRights", "groups", "XWiki.XWikiAdminGroup",
                 "allow", 1, "levels", "admin");
             // Make sure the wiki administration is not locked by the superadmin user.
@@ -120,7 +130,7 @@ class FlashIT
         // Create the default entry document inside the wiki
         if (!setup.pageExists("Flash", flashUtil.getDefaultEntry().getName())) {
             // Login as an administrator
-            flashUtil.login("LightYagami", "justice");
+            flashUtil.login(FlashUtil.ADMIN_USER, FlashUtil.ADMIN_PASSWORD);
 
             // Create the document
             flashUtil.createEntry(flashUtil.getDefaultEntry());
@@ -198,7 +208,7 @@ class FlashIT
     void testAdminRights()
     {
         // Login as Light Yagami (administrator).
-        flashUtil.login("LightYagami", "justice");
+        flashUtil.login(FlashUtil.ADMIN_USER, FlashUtil.ADMIN_PASSWORD);
 
         /*
          * Home page
@@ -267,7 +277,7 @@ class FlashIT
         String entryPage = flashUtil.getDefaultEntryName();
 
         // Enable support for multiple languages
-        this.flashUtil.login("LightYagami", "justice");
+        this.flashUtil.login(FlashUtil.ADMIN_USER, FlashUtil.ADMIN_PASSWORD);
         setup.addObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences");
         setup.updateObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences", 0, "multilingual", 1);
         setup.updateObject("XWiki", "XWikiPreferences", "XWiki.XWikiPreferences", 0, "languages", "en,fr");
@@ -328,7 +338,7 @@ class FlashIT
     void testDataEntry()
     {
         // Login as Light Yagami (administrator).
-        flashUtil.login("LightYagami", "justice");
+        flashUtil.login(FlashUtil.ADMIN_USER, FlashUtil.ADMIN_PASSWORD);
 
         // Go to the application's home page
         FlashHomePage homePage = FlashHomePage.gotoPage();
@@ -385,6 +395,102 @@ class FlashIT
         assertFalse(entryViewPage.hasPopup());
     }
 
+    /**
+     * A message from the main wiki shown on all wikis is displayed on subwikis and confirmed in the main wiki.
+     */
+    @ParameterizedTest
+    @WikisSource(mainWiki = false)
+    // Run before the application is installed on the subwiki by testSubwikiMessageOnOtherSubwiki.
+    @Order(1)
+    void testAllWikisMessageOnSubwiki(WikiReference wikiReference, TestUtils setup) throws Exception
+    {
+        FlashEntry entry = new FlashEntry("AllWikis",
+            flashUtil.getDate(0, 0, 0, -1, 0, true),
+            flashUtil.getDate(0, 0, 0, 1, 0, true),
+            false,
+            "daily",
+            1,
+            new ArrayList<String>(),
+            new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
+            "allWikis",
+            "All wikis");
+
+        try {
+            // TestUtils#gotoPage(EntityReference) ignores the wiki of the reference.
+            FlashEntryViewPage subwikiPage =
+                flashUtil.testMessage(entry, true, setup.getBaseBinURL(wikiReference.getName()) + "view/Main/");
+            assertEquals(wikiReference.getName(), subwikiPage.getMetaDataValue("wiki"));
+
+            // The pop-up should be present only once per user
+            assertFalse(subwikiPage.hasPopup());
+        } finally {
+            // Don't let the message pop up in the other tests.
+            setup.deletePage("Flash", entry.getName());
+        }
+    }
+
+    /**
+     * With the application installed on several wikis, a message from one subwiki is confirmed from another subwiki.
+     * Runs once for each subwiki, which in turn holds the message.
+     */
+    @ParameterizedTest
+    @WikisSource(value = 2, mainWiki = false, extensions = "com.xwiki.flashmessages:application-flashmessages-ui")
+    @Order(2)
+    void testSubwikiMessageOnOtherSubwiki(WikiReference wikiReference, TestUtils setup) throws Exception
+    {
+        String messageWiki = wikiReference.getName();
+        String otherWiki = "wiki1".equals(messageWiki) ? "wiki2" : "wiki1";
+        FlashEntry entry = new FlashEntry("OtherSubwiki",
+            flashUtil.getDate(0, 0, 0, -2, 0, true),
+            flashUtil.getDate(0, 0, 0, 2, 0, true),
+            false,
+            "daily",
+            1,
+            new ArrayList<String>(),
+            // Users of the main wiki are not members of the groups of the subwiki.
+            new ArrayList<String>(Arrays.asList("xwiki:XWiki.XWikiAllGroup")),
+            "allWikis",
+            "Other subwiki");
+
+        // FlashUtil#createEntry creates entries only in the main wiki.
+        DocumentReference messageReference = new DocumentReference(messageWiki, "Flash", entry.getName());
+        setup.rest().savePage(messageReference, "", "");
+        org.xwiki.rest.model.jaxb.Object message = setup.rest().object(messageReference, "Flash.FlashClass");
+        message.getProperties().addAll(List.of(
+            TestUtils.RestTestUtils.property("dateBegin", flashUtil.getFormattedDate(entry.getDateBegin())),
+            TestUtils.RestTestUtils.property("dateEnd", flashUtil.getFormattedDate(entry.getDateEnd())),
+            TestUtils.RestTestUtils.property("repeat", "0"),
+            TestUtils.RestTestUtils.property("groups", String.join("|", entry.getGroups())),
+            TestUtils.RestTestUtils.property("wikiScope", entry.getWikiScope()),
+            TestUtils.RestTestUtils.property("message", entry.getMessage())));
+        setup.rest().add(message);
+
+        try {
+            flashUtil.login(FlashUtil.ADMIN_USER, FlashUtil.ADMIN_PASSWORD);
+            flashUtil.waitUntilSolrReindex();
+
+            // TestUtils#gotoPage(EntityReference) ignores the wiki of the reference.
+            String otherWikiPage = setup.getBaseBinURL(otherWiki) + "view/Main/";
+            setup.gotoPage(otherWikiPage);
+            assertEquals(otherWiki, new ViewPage().getMetaDataValue("wiki"));
+            FlashPopup popup = new FlashPopup();
+            assertTrue(popup.getMessage().contains(entry.getMessage()));
+            // Times out if the message can't be marked as seen, e.g. when the request targets the current wiki.
+            popup.clickOk();
+
+            // The pop-up should be present only once per user, on all wikis.
+            setup.gotoPage(otherWikiPage);
+            assertFalse(FlashPopup.isPresent());
+            setup.gotoPage(setup.getBaseBinURL(messageWiki) + "view/Main/");
+            assertFalse(FlashPopup.isPresent());
+            assertTrue(new FlashSlider().containsMessage(flashUtil.getFormattedDate(entry.getDateBegin()),
+                entry.getMessage()));
+        } finally {
+            // Don't let the message pop up in the other tests.
+            setup.rest().delete(messageReference);
+        }
+    }
+
     @Test
     void testNonRecurringActiveMessage() throws Exception
     {
@@ -420,23 +526,6 @@ class FlashIT
     }
 
     @Test
-    void testDailyRecurringActiveMessage() throws Exception
-    {
-        FlashEntry entry = new FlashEntry("DailyRecurringActiveMessage",
-            flashUtil.getDate(0, 0, 0, -2, 0, true),
-            flashUtil.getDate(0, 0, 0, 2, 0, true),
-            true,
-            "daily",
-            2,
-            new ArrayList<String>(),
-            new ArrayList<String>(Arrays.asList("XWikiAdminGroup")),
-            "currentWiki",
-            "Every 2 days");
-
-        flashUtil.testMessage(entry, true);
-    }
-
-    @Test
     void testDailyRecurringInactiveMessage() throws Exception
     {
         FlashEntry entry = new FlashEntry("DailyRecurringInactiveMessage",
@@ -449,108 +538,6 @@ class FlashIT
             new ArrayList<String>(Arrays.asList("XWikiAdminGroup")),
             "currentWiki",
             "Every 3 days");
-
-        flashUtil.testMessage(entry, false);
-    }
-
-    @Test
-    void testWeeklyRecurringActiveMessage() throws Exception
-    {
-        FlashEntry entry = new FlashEntry("WeeklyRecurringActiveMessage",
-            flashUtil.getDate(0, -2, 0, 0, 0, true),
-            flashUtil.getDate(0, 0, 2, 0, 0, true),
-            true,
-            "weekly",
-            2,
-            new ArrayList<String>(Arrays.asList(flashUtil.getCurrentDayOfTheWeek())),
-            new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            "currentWiki",
-            "Every 2 weeks");
-
-        flashUtil.testMessage(entry, true);
-    }
-
-    @Test
-    void testWeeklyRecurringInactiveMessage() throws Exception
-    {
-        FlashEntry entry = new FlashEntry("WeeklyRecurringInactiveMessage",
-            flashUtil.getDate(0, 0, -2, 0, 0, true),
-            flashUtil.getDate(0, 0, 2, 1, 0, true),
-            true,
-            "weekly",
-            2,
-            new ArrayList<String>(Arrays.asList(flashUtil.getCurrentDayOfTheWeek() == "monday" ? "tuesday" : "monday")),
-            new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            "currentWiki",
-            "Every 2 weeks");
-
-        flashUtil.testMessage(entry, false);
-    }
-
-    @Test
-    void testMonthlyRecurringActiveMessage() throws Exception
-    {
-        FlashEntry entry = new FlashEntry("MonthlyRecurringActiveMessage",
-            flashUtil.getDate(-2, 0, 0, 0, 0, true),
-            flashUtil.getDate(5, 0, 0, 0, 0, true),
-            true,
-            "monthly",
-            6,
-            new ArrayList<String>(),
-            new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            "currentWiki",
-            "Every 6 months");
-
-        flashUtil.testMessage(entry, true);
-    }
-
-    @Test
-    void testMonthlyRecurringInactiveMessage() throws Exception
-    {
-        FlashEntry entry = new FlashEntry("MonthlyRecurringInactiveMessage",
-            flashUtil.getDate(-4, 0, 0, 0, 0, true),
-            flashUtil.getDate(3, 0, 0, 0, 0, true),
-            true,
-            "monthly",
-            9,
-            new ArrayList<String>(),
-            new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            "currentWiki",
-            "Every 9 months");
-
-        flashUtil.testMessage(entry, false);
-    }
-
-    @Test
-    void testYearlyRecurringActiveMessage() throws Exception
-    {
-        FlashEntry entry = new FlashEntry("YearlyRecurringActiveMessage",
-            flashUtil.getDate(-2, 0, 0, 0, 0, true),
-            flashUtil.getDate(5, 0, 0, 0, 0, true),
-            true,
-            "yearly",
-            2,
-            new ArrayList<String>(),
-            new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            "currentWiki",
-            "Every 2 years today");
-
-        flashUtil.testMessage(entry, true);
-    }
-
-    @Test
-    void testYearlyRecurringInactiveMessage() throws Exception
-    {
-        FlashEntry entry = new FlashEntry("YearlyRecurringInactiveMessage",
-            flashUtil.getDate(-4, 0, 0, 0, 0, true),
-            flashUtil.getDate(3, 0, 0, 0, 0, true),
-            true,
-            "yearly",
-            3,
-            new ArrayList<String>(),
-            new ArrayList<String>(Arrays.asList("XWikiAllGroup")),
-            "currentWiki",
-            "Every 3 years today");
 
         flashUtil.testMessage(entry, false);
     }

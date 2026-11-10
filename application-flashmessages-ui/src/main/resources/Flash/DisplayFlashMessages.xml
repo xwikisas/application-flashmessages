@@ -48,129 +48,38 @@
 #set ($discard = $xwiki.ssx.use("$flashInstallSubwiki:Flash.DisplayFlashMessages"))
 ##
 ###############################################
-##           Group filter
-###############################################
-## Collect the groups the current user is member of. This follows the logic from the Groups user profile section
-## (see XWiki.XWikiUserMembershipSheet)
-#if ("$!xcontext.userReference" == '')
-  ## Guest users can't be included in groups.
-  #set ($groups = [])
-#elseif ($xcontext.userReference.wikiReference.name == $xcontext.getMainWikiName())
-  ## Global users can be included in groups from any wiki.
-  #set ($groups = $services.user.group.getGroupsFromAllWikis($xcontext.userReference))
-#else
-  ## Local users are normally included only in local groups (from the same wiki).
-  #set ($groups = $services.user.group.getGroupsFromMemberWiki($xcontext.userReference))
-#end
-#set ($groupsFilter = [])
-#foreach ($groupReference in $groups)
-  ## Remove the wiki component from the group reference if it matches the wiki of the message.
-  #set ($groupReferenceCompact = $services.model.serialize($groupReference, 'local'))
-  #set ($groupReferenceFull  = $services.model.serialize($groupReference, 'default'))
-  #set ($messageWiki = $groupReference.getWikiReference().getName())
-  #set ($discard = $groupsFilter.add(
-    "(wiki:$messageWiki AND property.Flash.FlashClass.groups_string:""$groupReferenceCompact"")
-    OR (-wiki:$messageWiki AND property.Flash.FlashClass.groups_string:""$groupReferenceFull"")"))
-#end
-#if ($groupsFilter.size() &gt; 0)
-  #set ($groupsFilter = " AND ($stringtool.join($groupsFilter, ' OR ')) ")
-#else
-  #set ($groupsFilter = '')
-#end
-##
-###############################################
 ##            DISPLAY MESSAGES
 ###############################################
-#set($dateNow = $datetool.getSystemDate())
-##
-## If the user is not in any group then no message should be displayed
-#if($groups.size() &gt; 0)
-  #set($events = [])
-  #set ($query = $services.query.createQuery(
-    "object:Flash.FlashClass AND property.Flash.FlashClass.dateBegin:[* TO NOW]
-    AND -property.Flash.FlashClass.dateEnd:[* TO NOW]
-    AND (wiki:$doc.getWiki() OR property.Flash.FlashClass.wikiScope:allWikis)
-    ", 'solr').bindValue('fq', "type:DOCUMENT AND -fullname:Flash.FlashTemplate $groupsFilter"))
-  #set ($queryResults = $query.setLimit(300).execute().get(0).getResults())
-  ##
-  #foreach($event in $queryResults)
-    #set ($eventDocName    = "$event.wiki:$event.fullname")
-    ## If solr isn't up to date, don't include deleted flashmessages.
-    #if ($xwiki.exists($eventDocName))
-      #set ($dateBegin       = $event.get('property.Flash.FlashClass.dateBegin_sortDate'))
-      #set ($repeat          = $event.get('property.Flash.FlashClass.repeat_boolean')[0])
-      #set ($repeatInterval  = $event.get('property.Flash.FlashClass.repeatInterval_string')[0])
-      #set ($repeatFrequency = $numbertool.integer($event.get('property.Flash.FlashClass.repeatFrequency_string')[0]))
-      #set ($repeatDays      = $event.get('property.Flash.FlashClass.repeatDays_string'))
-      ##
-      #set ($today           = $datetool)
-      #set ($dayOfTheWeek    = $stringtool.lowerCase($datetool.format('EEEE', $today)))
-      #set ($dateDiff        = $datetool.difference($dateBegin, $today))
-      #if ($repeat == true)
-        #if (($repeatInterval == 'daily'   &amp;&amp; $mathtool.mod($dateDiff.days,   $repeatFrequency) == 0) ||
-            ($repeatInterval == 'weekly'  &amp;&amp; $mathtool.mod($dateDiff.weeks,  $repeatFrequency) == 0 &amp;&amp; $repeatDays.contains($dayOfTheWeek)) ||
-            ($repeatInterval == 'monthly' &amp;&amp; $mathtool.mod($dateDiff.months, $repeatFrequency) == 0 &amp;&amp; $datetool.format('d', $dateBegin) == $datetool.format('d', $today)) ||
-            ($repeatInterval == 'yearly'  &amp;&amp; $mathtool.mod($dateDiff.years,  $repeatFrequency) == 0 &amp;&amp; $datetool.format('Md', $dateBegin) == $datetool.format('Md', $today))
-          )
-          #set($discard = $events.add({'doc' : $eventDocName, 'date' : $dateBegin}))
+#set ($events = $services.flashmessages.getMessages())
+#if ($events.size() &gt; 0)
+
+  {{html wiki="true"}}
+    &lt;div id="flashMessages"&gt;
+      &lt;ul class="messages"&gt;
+        #foreach ($r in $events)
+          #set ($document = $xwiki.getDocument($r))
+          #set ($obj = $document.getObject('Flash.FlashClass'))
+          &lt;li class="unit"&gt;
+            #if ($hasAdmin)
+              &lt;span class="subwiki"&gt;[[$!services.rendering.escape($escapetool.xml($services.wiki.getById($document.getWiki()).getPrettyName()), 'xwiki/2.1')&gt;&gt;$document.getWiki():Flash.WebHome]]&lt;/span&gt;&amp;nbsp;
+            #end
+            &lt;span class="date"&gt;$!services.rendering.escape($!obj.display('dateBegin', 'view'), 'xwiki/2.1') : &lt;/span&gt;
+            &lt;span class="message"&gt;$!services.rendering.escape($!obj.display('message', 'view'), 'xwiki/2.1')&lt;/span&gt;
+          &lt;/li&gt;
         #end
-      #else
-        #set($discard = $events.add({'doc' : $eventDocName, 'date' : $dateBegin}))
-      #end
-    #end
-  #end
-  ##
-  #set($events = $collectiontool.sort($events, 'date:desc'))
-  ##
-  #if($events.size() &gt; 0)
+      &lt;/ul&gt;
+      &lt;ul class="navigation"&gt;&lt;/ul&gt;
+    &lt;/div&gt;
+  {{/html}}
 
-    {{html wiki="true"}}
-      &lt;div id="flashMessages"&gt;
-        &lt;ul class="messages"&gt;
-          #foreach($r in $events)
-            #set($document = $xwiki.getDocument($r.doc))
-            #set($obj = $document.getObject('Flash.FlashClass'))
-            &lt;li class="unit"&gt;
-              #if ($hasAdmin)
-                &lt;span class="subwiki"&gt;[[$!services.rendering.escape($escapetool.xml($services.wiki.getById($document.getWiki()).getPrettyName()), 'xwiki/2.1')&gt;&gt;$document.getWiki():Flash.WebHome]]&lt;/span&gt;&amp;nbsp;
-              #end
-              &lt;span class="date"&gt;$!services.rendering.escape($!obj.display('dateBegin', 'view'), 'xwiki/2.1') : &lt;/span&gt;
-              &lt;span class="message"&gt;$!services.rendering.escape($!obj.display('message', 'view'), 'xwiki/2.1')&lt;/span&gt;
-            &lt;/li&gt;
-          #end
-        &lt;/ul&gt;
-        &lt;ul class="navigation"&gt;&lt;/ul&gt;
-      &lt;/div&gt;
-    {{/html}}
-
-  #end
 #end
 ###############################################
 ##            DISPLAY ALERT
 ###############################################
-#set($userDoc = $xwiki.getDocument($xcontext.user))
-#set ($userLocalString = $services.model.serialize($userDoc, 'local'))
-#set($userValObj = $userDoc.getObject('Flash.FlashValidationClass'))
-#set($userValList = $userValObj.getProperty('flash').getValue())
-#set($need = [])
-#set($dateFormat = 'dd/MM/yyyy')
+#set ($need = [])
 #foreach ($msg in $events)
-  #set ($msgDoc = $xwiki.getDocument($msg.doc))
-  #set ($msgValObj = $msgDoc.getObject('Flash.FlashValidationClass'))
-  #set ($msgValList = $msgValObj.getProperty('flash').getValue())
-  #set ($seenDate = $msgValObj.getValue('seenDate'))
-  #set ($wasSeenToday = $datetool.format($dateFormat, $dateNow) == $datetool.format($dateFormat, $seenDate))
-  #set ($doRepeatEntry = $msgDoc.getObject('Flash.FlashClass').getValue('repeat') == 1)
-  ## If viewed from one subwiki and the message is from another subwiki, user references are serialized differently.
-  #if ($msgDoc.getWiki() == $userDoc.getWiki())
-    #set ($userStr = $userLocalString)
-  #else
-    #set ($userStr = $xcontext.user)
-  #end
-  ## Check if the message was already seen by this user or if it wasn't seen today, for entries with repeat selected.
-  #if ((!$userValList.contains($msg.doc) &amp;&amp; !$msgValList.contains($userStr))
-      || (!$wasSeenToday &amp;&amp; $doRepeatEntry))
-    #set ($discard = $need.add($msg.doc))
+  #if ($services.flashmessages.needsConfirmation($msg))
+    #set ($discard = $need.add($msg))
   #end
 #end
 #if(!$need.empty())
@@ -189,7 +98,7 @@
     #set($date = $!objFlash.display('dateBegin', 'view'))
     {
       'message'  : '$escapetool.javascript($message)',
-      'document' : '$escapetool.javascript($n)',
+      'document' : '$escapetool.javascript($services.model.serialize($n, 'default'))',
       'date'     : '$escapetool.javascript($date)',
     }
   #end

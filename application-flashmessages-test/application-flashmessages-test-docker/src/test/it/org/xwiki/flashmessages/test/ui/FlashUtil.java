@@ -29,6 +29,7 @@ import org.junit.Assert;
 import org.xwiki.flashmessages.test.po.FlashEntryEditPage;
 import org.xwiki.flashmessages.test.po.FlashEntryViewPage;
 import org.xwiki.flashmessages.test.po.FlashHomePage;
+import org.xwiki.flashmessages.test.po.FlashPopup;
 import org.xwiki.flashmessages.test.po.FlashSlider;
 import org.xwiki.repository.test.SolrTestUtils;
 import org.xwiki.test.ui.TestUtils;
@@ -42,6 +43,16 @@ import org.xwiki.test.ui.po.CreatePagePage;
  */
 public class FlashUtil
 {
+    /**
+     * The administrator used by the tests.
+     */
+    public static final String ADMIN_USER = "LightYagami";
+
+    /**
+     * The password of {@link #ADMIN_USER}.
+     */
+    public static final String ADMIN_PASSWORD = "justice";
+
     private static FlashUtil instance;
     
     private TestUtils setup;
@@ -334,11 +345,25 @@ public class FlashUtil
      */
     public FlashEntryViewPage testMessage(FlashEntry entry, Boolean shouldBeInSlider) throws Exception
     {
-        // Login as Light Yagami (administrator).
-        login("LightYagami", "justice");
+        return testMessage(entry, shouldBeInSlider, null);
+    }
 
-        // Create entry and get the resulting view page
-        FlashEntryViewPage entryViewPage = createEntry(entry);
+    /**
+     * Test a Flash Message entry
+     *
+     * @param entry FlashEntry object containing the entry data
+     * @param shouldBeInSlider should the entry be displayed in the slider (active or not)
+     * @param pageURL the URL of the page on which the entry is checked, the entry page when {@code null}
+     * @throws Exception
+     */
+    public FlashEntryViewPage testMessage(FlashEntry entry, Boolean shouldBeInSlider, String pageURL)
+        throws Exception
+    {
+        // Login as Light Yagami (administrator).
+        login(ADMIN_USER, ADMIN_PASSWORD);
+
+        // Create entry
+        createEntry(entry);
 
         // Check if the entry document was created
         Assert.assertTrue(this.setup.pageExists("Flash", entry.getName()));
@@ -347,11 +372,19 @@ public class FlashUtil
         waitUntilSolrReindex();
 
         // Get the Flash Message view page
-        entryViewPage = FlashEntryViewPage.gotoPage(entry.getName());
+        FlashEntryViewPage entryViewPage;
+        if (pageURL == null) {
+            entryViewPage = FlashEntryViewPage.gotoPage(entry.getName());
+        } else {
+            this.setup.gotoPage(pageURL);
+            entryViewPage = new FlashEntryViewPage();
+        }
 
-        // Click the pop-up notification
-        if (shouldBeInSlider && entryViewPage.hasPopup()) {
-            entryViewPage.getPopup().clickOk();
+        // Click the pop-up notification, which fails if the pop-up doesn't show up
+        if (shouldBeInSlider) {
+            FlashPopup popup = entryViewPage.getPopup();
+            Assert.assertTrue(popup.getMessage().contains(entry.getMessage()));
+            popup.clickOk();
             entryViewPage = entryViewPage.reload();
         }
 
